@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { useSalesforceClient } from '@/lib/salesforce/hooks'
 import { UserPermissions, PermissionContextType, ObjectType, PermissionAction } from './types'
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined)
@@ -13,14 +12,13 @@ interface PermissionProviderProps {
 
 export function PermissionProvider({ children }: PermissionProviderProps) {
   const { data: session, status } = useSession()
-  const client = useSalesforceClient()
   
   const [permissions, setPermissions] = useState<UserPermissions | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchPermissions = useCallback(async () => {
-    if (!client || status !== 'authenticated') {
+    if (status !== 'authenticated') {
       setLoading(false)
       return
     }
@@ -29,7 +27,14 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
       setLoading(true)
       setError(null)
       
-      const userPermissions = await client.getUserPermissions()
+      // サーバーサイドAPIエンドポイントを使用してCORSエラーを回避
+      const response = await fetch('/api/salesforce/permissions')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const userPermissions = await response.json()
       setPermissions(userPermissions)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch permissions'
@@ -46,7 +51,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
     } finally {
       setLoading(false)
     }
-  }, [client, status])
+  }, [status])
 
   const hasPermission = useCallback((object: ObjectType, action: PermissionAction): boolean => {
     if (!permissions) return false
@@ -77,14 +82,14 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
 
   // セッション変更時に権限を再取得
   useEffect(() => {
-    if (status === 'authenticated' && client) {
+    if (status === 'authenticated') {
       fetchPermissions()
     } else if (status === 'unauthenticated') {
       setPermissions(null)
       setLoading(false)
       setError(null)
     }
-  }, [status, client, fetchPermissions])
+  }, [status, fetchPermissions])
 
   const contextValue: PermissionContextType = {
     permissions,

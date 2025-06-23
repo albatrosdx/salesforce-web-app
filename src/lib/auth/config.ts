@@ -3,6 +3,31 @@ import { SalesforceAuth } from './salesforce'
 
 const salesforceAuth = new SalesforceAuth()
 
+// Environment variable validation
+const validateEnvVars = () => {
+  const required = {
+    SALESFORCE_INSTANCE_URL: process.env.SALESFORCE_INSTANCE_URL,
+    SALESFORCE_CLIENT_ID: process.env.SALESFORCE_CLIENT_ID,
+    SALESFORCE_CLIENT_SECRET: process.env.SALESFORCE_CLIENT_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  }
+
+  const missing = Object.entries(required)
+    .filter(([_, value]) => !value)
+    .map(([key, _]) => key)
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}\n` +
+      'Please check your .env.local file and ensure all Salesforce credentials are properly configured.'
+    )
+  }
+
+  return required
+}
+
+const env = validateEnvVars()
+
 export const authOptions: NextAuthOptions = {
   providers: [
     {
@@ -10,16 +35,17 @@ export const authOptions: NextAuthOptions = {
       name: 'Salesforce',
       type: 'oauth',
       authorization: {
-        url: `${process.env.SALESFORCE_INSTANCE_URL}/services/oauth2/authorize`,
+        url: `${env.SALESFORCE_INSTANCE_URL}/services/oauth2/authorize`,
         params: {
           scope: 'api refresh_token offline_access',
           response_type: 'code',
         },
       },
-      token: `${process.env.SALESFORCE_INSTANCE_URL}/services/oauth2/token`,
-      userinfo: `${process.env.SALESFORCE_INSTANCE_URL}/services/oauth2/userinfo`,
-      clientId: process.env.SALESFORCE_CLIENT_ID,
-      clientSecret: process.env.SALESFORCE_CLIENT_SECRET,
+      token: `${env.SALESFORCE_INSTANCE_URL}/services/oauth2/token`,
+      userinfo: `${env.SALESFORCE_INSTANCE_URL}/services/oauth2/userinfo`,
+      checks: ['state'],
+      clientId: env.SALESFORCE_CLIENT_ID!,
+      clientSecret: env.SALESFORCE_CLIENT_SECRET!,
       profile(profile) {
         return {
           id: profile.user_id,
