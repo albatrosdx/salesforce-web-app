@@ -14,11 +14,9 @@ module.exports = {
           600: '#2563eb',
           700: '#1d4ed8',
         },
-        salesforce: {
-          blue: '#0176d3',
-          lightblue: '#1b96ff',
-          darkblue: '#032d60',
-        }
+        'salesforce-blue': '#0176d3',
+        'salesforce-lightblue': '#1b96ff',
+        'salesforce-darkblue': '#032d60',
       },
     },
   },

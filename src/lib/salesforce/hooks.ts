@@ -98,8 +98,10 @@ export function useAccountSearch(searchTerm: string, limit = 20) {
   const client = useSalesforceClient()
   
   return useAsyncData(
-    async () => {
-      if (!client || !searchTerm.trim()) return { totalSize: 0, done: true, records: [] }
+    () => {
+      if (!client || !searchTerm.trim()) {
+        return Promise.resolve({ records: [], totalSize: 0, done: true })
+      }
       return client.searchAccounts(searchTerm, limit)
     },
     [client, searchTerm, limit]
@@ -128,6 +130,20 @@ export function useContact(id: string | null) {
       return client.getContact(id)
     },
     [client, id]
+  )
+}
+
+export function useContactSearch(searchTerm: string, limit = 20) {
+  const client = useSalesforceClient()
+  
+  return useAsyncData(
+    () => {
+      if (!client || !searchTerm.trim()) {
+        return Promise.resolve({ records: [], totalSize: 0, done: true })
+      }
+      return client.searchContacts(searchTerm, limit)
+    },
+    [client, searchTerm, limit]
   )
 }
 

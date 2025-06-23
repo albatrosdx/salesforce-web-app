@@ -169,6 +169,18 @@ export class SalesforceClient {
     return this.query<Contact>(soql)
   }
 
+  async searchContacts(searchTerm: string, limit = 20): Promise<SalesforceQueryResponse<Contact>> {
+    const soql = `
+      SELECT Id, FirstName, LastName, Name, AccountId, Account.Name, 
+             Email, Phone, Title, Department
+      FROM Contact 
+      WHERE Name LIKE '%${searchTerm}%' OR Email LIKE '%${searchTerm}%'
+      ORDER BY LastName ASC, FirstName ASC 
+      LIMIT ${limit}
+    `
+    return this.query<Contact>(soql)
+  }
+
   // Opportunity関連メソッド
   async getOpportunities(limit = 50, offset = 0): Promise<SalesforceQueryResponse<Opportunity>> {
     const soql = `
