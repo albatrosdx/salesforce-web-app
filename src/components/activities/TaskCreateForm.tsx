@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { Button, Input, TextArea, Select } from '@/components/ui'
-import { useCreateTask, useAccountSearch, useContactSearch, useOpportunitySearch } from '@/lib/salesforce/hooks'
+import { useCreateActivity } from '@/lib/salesforce/api-hooks'
+import { useAccountSearch, useContactSearch, useOpportunitySearch } from '@/lib/salesforce/hooks'
 
 interface TaskCreateFormProps {
   onSuccess?: (taskId: string) => void
@@ -15,7 +16,7 @@ interface TaskCreateFormProps {
 }
 
 export function TaskCreateForm({ onSuccess, onCancel, defaultValues }: TaskCreateFormProps) {
-  const { createTask, isLoading, error, clearError } = useCreateTask()
+  const { createActivity, isLoading, error, clearError } = useCreateActivity()
   
   const [formData, setFormData] = useState({
     Subject: defaultValues?.Subject || '',
@@ -58,7 +59,7 @@ export function TaskCreateForm({ onSuccess, onCancel, defaultValues }: TaskCreat
       return
     }
 
-    const result = await createTask({
+    const result = await createActivity('Task', {
       Subject: formData.Subject,
       Description: formData.Description || undefined,
       ActivityDate: formData.ActivityDate,

@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { OpportunityDetail } from '@/components/opportunities'
-import { useOpportunity } from '@/lib/salesforce'
+import { useOpportunity } from '@/lib/salesforce/api-hooks'
 
 export default function OpportunityDetailPage() {
   const params = useParams()

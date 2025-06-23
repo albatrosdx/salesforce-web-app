@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { AccountDetail } from '@/components/accounts'
-import { useAccount, useContactsByAccount, useOpportunitiesByAccount } from '@/lib/salesforce'
+import { useAccount, useContactsByAccount, useOpportunitiesByAccount } from '@/lib/salesforce/api-hooks'
 
 export default function AccountDetailPage() {
   const params = useParams()
