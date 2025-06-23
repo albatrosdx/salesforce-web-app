@@ -1,73 +1,36 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, Button } from '@/components'
-import { salesforceClient } from '@/lib/salesforce/client'
-import { Task } from '@/types/salesforce'
+import { Task, Event } from '@/types/salesforce'
 
-export default function ActivitiesPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [activities, setActivities] = useState<Task[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+type Activity = (Task | Event) & { activityType: 'Task' | 'Event' }
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-      return
-    }
+interface ActivitiesResponse {
+  records: Activity[]
+  totalSize: number
+  done: boolean
+}
 
-    if (session) {
-      fetchActivities()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status, router])
-
-  const fetchActivities = async () => {
-    try {
-      setLoading(true)
-      const client = salesforceClient(session!)
-      const result = await client.query<Task>(
-        `SELECT Id, Subject, Status, Type, ActivityDate, Description, 
-         Who.Name, What.Name, Owner.Name, CreatedDate 
-         FROM Task 
-         WHERE IsDeleted = false 
-         ORDER BY CreatedDate DESC 
-         LIMIT 50`
-      )
-      setActivities(result.records)
-    } catch (err) {
-      console.error('Error fetching activities:', err)
-      setError('活動の取得中にエラーが発生しました')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      </div>
+async function getActivities(): Promise<ActivitiesResponse> {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/salesforce/activities/list?limit=50`,
+      { cache: 'no-store' }
     )
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch activities')
+    }
+    
+    return response.json()
+  } catch (error) {
+    console.error('Error fetching activities:', error)
+    return { records: [], totalSize: 0, done: true }
   }
+}
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <p className="text-red-600">{error}</p>
-          <Button onClick={fetchActivities} className="mt-4">
-            再試行
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
+export default async function ActivitiesPage() {
+  const data = await getActivities()
+
 
   return (
     <div className="space-y-6">
@@ -105,7 +68,7 @@ export default function ActivitiesPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {activities.map((activity) => (
+                {data.records.map((activity) => (
                   <tr key={activity.Id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Link 
@@ -116,13 +79,16 @@ export default function ActivitiesPage() {
                       </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {activity.Type || 'その他'}
+                      {activity.activityType === 'Task' ? 'ToDo' : 'イベント'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {activity.Status}
+                      {activity.activityType === 'Task' ? (activity as Task).Status : '予定'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {activity.ActivityDate ? new Date(activity.ActivityDate).toLocaleDateString('ja-JP') : '-'}
+                      {activity.activityType === 'Task' ? 
+                        ((activity as Task).ActivityDate ? new Date((activity as Task).ActivityDate!).toLocaleDateString('ja-JP') : '-') :
+                        ((activity as Event).StartDateTime ? new Date((activity as Event).StartDateTime!).toLocaleDateString('ja-JP') : '-')
+                      }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {activity.What?.Name || activity.Who?.Name || '-'}
@@ -134,7 +100,7 @@ export default function ActivitiesPage() {
                 ))}
               </tbody>
             </table>
-            {activities.length === 0 && (
+            {data.records.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 活動が見つかりません
               </div>
