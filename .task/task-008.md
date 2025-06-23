@@ -146,16 +146,16 @@ Page Component → Salesforce Hook → SalesforceClient → Salesforce API
 ```
 
 ## 完了条件
-- [ ] ブランチ管理ルールに従った開発
-- [ ] ContactListコンポーネントの完全実装
-- [ ] ContactDetailコンポーネントの完全実装
-- [ ] ContactSearchコンポーネントの実装
-- [ ] 取引先責任者一覧ページのSalesforceデータ統合
-- [ ] 取引先責任者詳細ページの動的ルーティング実装
-- [ ] 取引先責任者検索ページの実装
-- [ ] エラーハンドリングの実装
-- [ ] レスポンシブデザインの実装
-- [ ] TypeScript型チェック通過
+- [x] ブランチ管理ルールに従った開発
+- [x] ContactListコンポーネントの完全実装
+- [x] ContactDetailコンポーネントの完全実装
+- [x] ContactSearchコンポーネントの実装
+- [x] 取引先責任者一覧ページのSalesforceデータ統合
+- [x] 取引先責任者詳細ページの動的ルーティング実装
+- [x] 取引先責任者検索ページの実装
+- [x] エラーハンドリングの実装
+- [x] レスポンシブデザインの実装
+- [x] TypeScript型チェック通過
 
 ## 今後の拡張予定
 - 取引先責任者作成・編集フォーム
@@ -171,3 +171,9 @@ Page Component → Salesforce Hook → SalesforceClient → Salesforce API
 
 ## 開始日時
 2025-06-23
+
+## 完了日時
+2025-06-23
+
+## プルリクエスト
+https://github.com/albatrosdx/salesforce-web-app/pull/4
