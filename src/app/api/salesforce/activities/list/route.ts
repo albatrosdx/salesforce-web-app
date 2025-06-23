@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       SELECT Id, Subject, Status, Priority, ActivityDate, Description,
              WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
              OwnerId, Owner.Name, IsHighPriority, IsClosed,
-             CreatedDate, LastModifiedDate, Type
+             CreatedDate, LastModifiedDate
       FROM Task
       WHERE IsDeleted = false
       ORDER BY ActivityDate DESC, CreatedDate DESC

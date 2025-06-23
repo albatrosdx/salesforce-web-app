@@ -24,7 +24,7 @@ export async function GET(
       'Id', 'Subject', 'Status', 'Priority', 'ActivityDate', 'Description',
       'WhatId', 'What.Name', 'What.Type', 'WhoId', 'Who.Name', 'Who.Type',
       'OwnerId', 'Owner.Name', 'IsHighPriority', 'IsClosed',
-      'CreatedDate', 'LastModifiedDate', 'Type'
+      'CreatedDate', 'LastModifiedDate'
     ].join(',')
     
     let response = await fetch(
