@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Contact } from '@/types'  
 import { Button } from '@/components/ui'
 import { formatDate, formatPhone } from '@/lib/utils/format'
+import { ActivityTimeline } from '@/components/activities/ActivityTimeline'
+import { useActivitiesByWho } from '@/lib/salesforce/hooks'
 
 interface ContactDetailProps {
   contact: Contact
@@ -20,6 +22,9 @@ export function ContactDetail({
   onDelete 
 }: ContactDetailProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'activities' | 'other'>('details')
+  
+  // Fetch activities for this contact
+  const { data: activitiesData, isLoading: activitiesLoading, error: activitiesError } = useActivitiesByWho(contact.Id)
 
   if (loading) {
     return (
@@ -259,24 +264,34 @@ export function ContactDetail({
         )}
 
         {activeTab === 'activities' && (
-          <div className="text-center py-12">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          <div>
+            {activitiesError ? (
+              <div className="text-center py-12">
+                <svg
+                  className="mx-auto h-12 w-12 text-red-400 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">エラーが発生しました</h3>
+                <p className="text-gray-600">
+                  活動データの取得中にエラーが発生しました: {activitiesError}
+                </p>
+              </div>
+            ) : (
+              <ActivityTimeline
+                tasks={activitiesData?.tasks.records || []}
+                events={activitiesData?.events.records || []}
+                loading={activitiesLoading}
               />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">活動タイムライン</h3>
-            <p className="text-gray-600">
-              活動タイムライン機能は今後実装予定です。
-            </p>
+            )}
           </div>
         )}
 

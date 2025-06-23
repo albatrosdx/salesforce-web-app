@@ -101,3 +101,78 @@ export function formatPercentage(percentage: number | null | undefined): string 
     maximumFractionDigits: 1,
   }).format(percentage / 100)
 }
+
+/**
+ * 日時フォーマット関数（詳細表示用）
+ */
+export function formatDateTime(dateString: string): string {
+  if (!dateString) return ''
+  
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('ja-JP', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(date)
+  } catch {
+    return dateString
+  }
+}
+
+/**
+ * 期間フォーマット関数（イベント用）
+ */
+export function formatDuration(startDate: string, endDate: string): string {
+  if (!startDate || !endDate) return ''
+  
+  try {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    
+    const startTime = new Intl.DateTimeFormat('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(start)
+    
+    const endTime = new Intl.DateTimeFormat('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(end)
+    
+    return `${startTime} - ${endTime}`
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * 相対時間フォーマット関数
+ */
+export function formatRelativeTime(dateString: string): string {
+  if (!dateString) return ''
+  
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+    
+    if (diffDays > 0) {
+      return `${diffDays}日前`
+    } else if (diffHours > 0) {
+      return `${diffHours}時間前`
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes}分前`
+    } else {
+      return 'たった今'
+    }
+  } catch {
+    return dateString
+  }
+}

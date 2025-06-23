@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Opportunity } from '@/types'  
 import { Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatPercentage } from '@/lib/utils/format'
+import { ActivityTimeline } from '@/components/activities/ActivityTimeline'
+import { useActivitiesByWhat } from '@/lib/salesforce/hooks'
 
 interface OpportunityDetailProps {
   opportunity: Opportunity
@@ -20,6 +22,9 @@ export function OpportunityDetail({
   onDelete 
 }: OpportunityDetailProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'activities' | 'other'>('details')
+  
+  // Fetch activities data for this opportunity
+  const { data: activities, isLoading: activitiesLoading } = useActivitiesByWhat(opportunity.Id)
 
   const getStageColor = (stage: string) => {
     switch (stage) {
@@ -285,25 +290,15 @@ export function OpportunityDetail({
         )}
 
         {activeTab === 'activities' && (
-          <div className="text-center py-12">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">活動タイムライン</h3>
-            <p className="text-gray-600">
-              活動タイムライン機能は今後実装予定です。
-            </p>
-          </div>
+          <ActivityTimeline
+            tasks={activities?.tasks.records || []}
+            events={activities?.events.records || []}
+            loading={activitiesLoading}
+            onRefresh={() => {
+              // Optional: Add refresh functionality
+              window.location.reload()
+            }}
+          />
         )}
 
         {activeTab === 'other' && (
