@@ -3,10 +3,10 @@ import { NextAuthOptions } from 'next-auth'
 // Environment variable validation
 const validateEnvVars = () => {
   const required = {
-    SALESFORCE_INSTANCE_URL: process.env.SALESFORCE_INSTANCE_URL,
-    SALESFORCE_CLIENT_ID: process.env.SALESFORCE_CLIENT_ID,
-    SALESFORCE_CLIENT_SECRET: process.env.SALESFORCE_CLIENT_SECRET,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    SALESFORCE_INSTANCE_URL: process.env.SALESFORCE_INSTANCE_URL?.trim(),
+    SALESFORCE_CLIENT_ID: process.env.SALESFORCE_CLIENT_ID?.trim(),
+    SALESFORCE_CLIENT_SECRET: process.env.SALESFORCE_CLIENT_SECRET?.trim(),
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET?.trim(),
   }
 
   const missing = Object.entries(required)
@@ -20,10 +20,29 @@ const validateEnvVars = () => {
     )
   }
 
+  // Additional URL validation for SALESFORCE_INSTANCE_URL
+  if (required.SALESFORCE_INSTANCE_URL) {
+    try {
+      new URL(required.SALESFORCE_INSTANCE_URL)
+    } catch {
+      throw new Error(
+        `Invalid SALESFORCE_INSTANCE_URL: ${required.SALESFORCE_INSTANCE_URL}\n` +
+        'Please ensure the URL is properly formatted (e.g., https://your-domain.my.salesforce.com)'
+      )
+    }
+  }
+
   return required
 }
 
 const env = validateEnvVars()
+
+// Helper function to construct Salesforce URLs safely
+const getSalesforceUrl = (path: string): string => {
+  const baseUrl = env.SALESFORCE_INSTANCE_URL!.replace(/\/+$/, '') // Remove trailing slashes
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  return `${baseUrl}${cleanPath}`
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -32,14 +51,14 @@ export const authOptions: NextAuthOptions = {
       name: 'Salesforce',
       type: 'oauth',
       authorization: {
-        url: `${env.SALESFORCE_INSTANCE_URL}/services/oauth2/authorize`,
+        url: getSalesforceUrl('/services/oauth2/authorize'),
         params: {
           scope: 'api refresh_token offline_access',
           response_type: 'code',
         },
       },
-      token: `${env.SALESFORCE_INSTANCE_URL}/services/oauth2/token`,
-      userinfo: `${env.SALESFORCE_INSTANCE_URL}/services/oauth2/userinfo`,
+      token: getSalesforceUrl('/services/oauth2/token'),
+      userinfo: getSalesforceUrl('/services/oauth2/userinfo'),
       checks: ['state'],
       clientId: env.SALESFORCE_CLIENT_ID!,
       clientSecret: env.SALESFORCE_CLIENT_SECRET!,
