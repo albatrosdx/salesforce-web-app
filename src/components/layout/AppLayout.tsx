@@ -24,12 +24,10 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // 認証済みの場合は必ずサイドバーレイアウトを表示
   return (
-    <div className="h-screen flex bg-gray-100">
+    <div className="app-layout">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-64">
-          <Sidebar />
-        </div>
+      <div className="sidebar hidden lg:block">
+        <Sidebar />
       </div>
 
       {/* Mobile Sidebar */}
@@ -46,10 +44,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="main-content">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 relative overflow-y-auto focus:outline-none bg-gray-100">
+        <main className="flex-1 relative overflow-y-auto focus:outline-none" style={{ backgroundColor: '#f3f2f2' }}>
           <div className="py-6 px-4 sm:px-6 lg:px-8">
             {children}
           </div>

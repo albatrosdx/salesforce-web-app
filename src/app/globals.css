@@ -2,6 +2,421 @@
 @tailwind components;
 @tailwind utilities;
 
+/* リセットとベーススタイル */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f3f2f2;
+}
+
+/* Salesforce風カラー定義 */
+:root {
+  --salesforce-blue: #0176d3;
+  --salesforce-lightblue: #1b96ff;
+  --salesforce-darkblue: #032d60;
+  --salesforce-gray-bg: #f3f2f2;
+  --salesforce-white: #ffffff;
+  --salesforce-border: #dddbda;
+  --salesforce-text: #080707;
+  --salesforce-text-secondary: #3e3e3c;
+}
+
+/* レイアウトスタイル */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  background-color: var(--salesforce-gray-bg);
+}
+
+/* サイドバースタイル */
+.sidebar {
+  width: 256px;
+  background-color: #1e293b;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-header {
+  padding: 16px 24px;
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logo-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #3b82f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  margin-bottom: 4px;
+}
+
+.sidebar-section-header {
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.sidebar-section-header:hover {
+  background-color: #334155;
+  color: white;
+}
+
+.sidebar-items {
+  margin-top: 4px;
+  margin-left: 12px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  gap: 12px;
+}
+
+.sidebar-item:hover {
+  background-color: #334155;
+  color: white;
+}
+
+.sidebar-item.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #334155;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* メインコンテンツ */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ヘッダー */
+.header {
+  background-color: white;
+  border-bottom: 1px solid var(--salesforce-border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ダッシュボード */
+.dashboard {
+  padding: 24px;
+  background-color: var(--salesforce-gray-bg);
+  min-height: 100%;
+}
+
+.dashboard-header {
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--salesforce-text);
+  margin: 0;
+}
+
+.dashboard-subtitle {
+  font-size: 14px;
+  color: var(--salesforce-text-secondary);
+  margin-top: 4px;
+}
+
+/* メトリクスカード */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.metric-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--salesforce-border);
+  transition: all 0.2s;
+}
+
+.metric-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: var(--salesforce-text-secondary);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--salesforce-text);
+  line-height: 1;
+}
+
+.metric-change {
+  font-size: 14px;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.metric-change.negative {
+  color: #dc2626;
+}
+
+/* リストビュー */
+.list-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.list-header {
+  background-color: white;
+  border-bottom: 1px solid var(--salesforce-border);
+  padding: 16px 24px;
+}
+
+.list-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.list-title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.list-icon {
+  width: 24px;
+  height: 24px;
+  color: #6b7280;
+}
+
+.list-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--salesforce-text);
+  margin: 0;
+}
+
+.list-count {
+  font-size: 14px;
+  color: var(--salesforce-text-secondary);
+  margin-top: 4px;
+}
+
+.list-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* ボタンスタイル */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--salesforce-blue);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--salesforce-darkblue);
+}
+
+.btn-outline {
+  background-color: white;
+  border: 1px solid var(--salesforce-border);
+  color: var(--salesforce-text);
+}
+
+.btn-outline:hover {
+  background-color: #f9fafb;
+}
+
+/* テーブルスタイル */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background-color: #f9fafb;
+  border-bottom: 1px solid var(--salesforce-border);
+}
+
+.data-table th {
+  padding: 12px 24px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.data-table td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: var(--salesforce-text);
+}
+
+/* アイコン付きセル */
+.table-cell-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.table-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  background-color: #dbeafe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.table-icon {
+  width: 20px;
+  height: 20px;
+  color: #3b82f6;
+}
+
+.table-cell-primary {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3b82f6;
+}
+
+.table-cell-primary:hover {
+  color: #2563eb;
+}
+
+.table-cell-secondary {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* ステータスバッジ */
+.status-badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-badge.active {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+/* レスポンシブ */
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* カスタムスタイル */
 @layer components {
   .btn-primary {

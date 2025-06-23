@@ -83,31 +83,31 @@ export function AccountList({ className = '' }: AccountListProps) {
   }
 
   return (
-    <div className={`${className}`}>
+    <div className={`list-container ${className}`}>
       {/* List Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Building2 className="h-6 w-6 text-gray-600" />
+      <div className="list-header">
+        <div className="list-header-content">
+          <div className="list-title-section">
+            <Building2 className="list-icon" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">取引先</h1>
-              <p className="text-sm text-gray-500 mt-1">全 {totalItems} 件</p>
+              <h1 className="list-title">取引先</h1>
+              <p className="list-count">全 {totalItems} 件</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
+          <div className="list-actions">
+            <button className="btn btn-outline">
+              <Filter style={{ width: '16px', height: '16px' }} />
               フィルター
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+            </button>
+            <button className="btn btn-outline">
+              <Download style={{ width: '16px', height: '16px' }} />
               エクスポート
-            </Button>
+            </button>
             {hasPermission('accounts', 'create') && (
-              <Button onClick={() => router.push('/dashboard/accounts/new')}>
-                <Plus className="h-4 w-4 mr-2" />
+              <button className="btn btn-primary" onClick={() => router.push('/dashboard/accounts/new')}>
+                <Plus style={{ width: '16px', height: '16px' }} />
                 新規
-              </Button>
+              </button>
             )}
           </div>
         </div>
@@ -143,88 +143,65 @@ export function AccountList({ className = '' }: AccountListProps) {
           </div>
         ) : (
           <>
-            <div className="overflow-hidden">
-              <table className="min-w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data-table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                    <th style={{ width: '40px' }}>
+                      <input type="checkbox" style={{ borderRadius: '4px' }} />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      取引先名
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      業界
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      電話番号
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      年間売上
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      従業員数
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      状態
-                    </th>
-                    <th className="relative px-6 py-3">
-                      <span className="sr-only">アクション</span>
-                    </th>
+                    <th>取引先名</th>
+                    <th>業界</th>
+                    <th>電話番号</th>
+                    <th>年間売上</th>
+                    <th>従業員数</th>
+                    <th>状態</th>
+                    <th style={{ width: '60px' }}>アクション</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody>
                   {accounts.map((account) => (
                     <tr 
                       key={account.Id}
-                      className="hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => handleRowClick(account)}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <input type="checkbox" className="rounded border-gray-300" />
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <input type="checkbox" style={{ borderRadius: '4px' }} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                              <Building2 className="h-5 w-5 text-blue-600" />
-                            </div>
+                      <td>
+                        <div className="table-cell-with-icon">
+                          <div className="table-icon-wrapper">
+                            <Building2 className="table-icon" />
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                          <div>
+                            <div className="table-cell-primary">
                               {account.Name}
                             </div>
                             {account.Type && (
-                              <div className="text-sm text-gray-500">
+                              <div className="table-cell-secondary">
                                 {account.Type}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {account.Industry || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {account.Phone || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td>{account.Industry || '-'}</td>
+                      <td>{account.Phone || '-'}</td>
+                      <td>
                         {account.AnnualRevenue 
                           ? `¥${account.AnnualRevenue.toLocaleString('ja-JP')}`
                           : '-'
                         }
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {account.NumberOfEmployees?.toLocaleString() || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      <td>{account.NumberOfEmployees?.toLocaleString() || '-'}</td>
+                      <td>
+                        <span className="status-badge active">
                           アクティブ
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <MoreVertical className="h-4 w-4" />
+                      <td onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}>
+                          <MoreVertical style={{ width: '16px', height: '16px' }} />
                         </button>
                       </td>
                     </tr>
