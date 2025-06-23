@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 
 declare global {
   var __nextauth_config_logged: boolean | undefined
+  var __nextauth_env_logged: boolean | undefined
 }
 
 // Environment variable validation with better error handling
@@ -19,10 +20,13 @@ const validateEnvVars = () => {
       .filter(([, value]) => !value)
       .map(([key]) => key)
 
-    // Log environment state for debugging
-    console.log('=== Environment Variables Check ===')
-    console.log('NODE_ENV:', process.env.NODE_ENV)
-    console.log('Available environment variables:', Object.keys(process.env).filter(k => k.startsWith('SALESFORCE_') || k.startsWith('NEXTAUTH_')))
+    // Log environment state for debugging only once
+    if (!global.__nextauth_env_logged) {
+      console.log('=== Environment Variables Check ===')
+      console.log('NODE_ENV:', process.env.NODE_ENV)
+      console.log('Available environment variables:', Object.keys(process.env).filter(k => k.startsWith('SALESFORCE_') || k.startsWith('NEXTAUTH_')))
+      global.__nextauth_env_logged = true
+    }
     
     if (missing.length > 0) {
       const errorMsg = `Missing required environment variables: ${missing.join(', ')}\n` +
@@ -61,9 +65,11 @@ const validateEnvVars = () => {
       }
     }
 
-    // Additional URL validation for NEXTAUTH_URL
+    // Additional URL validation for NEXTAUTH_URL and remove trailing slash
     if (required.NEXTAUTH_URL && required.NEXTAUTH_URL !== 'http://localhost:3000') {
       try {
+        // Remove trailing slash for consistency
+        required.NEXTAUTH_URL = required.NEXTAUTH_URL.replace(/\/$/, '')
         new URL(required.NEXTAUTH_URL)
       } catch {
         console.error(`Invalid NEXTAUTH_URL: ${required.NEXTAUTH_URL}`)
@@ -95,10 +101,12 @@ const validateEnvVars = () => {
 }
 
 // Safe environment validation
-let env: any
+let env: ReturnType<typeof validateEnvVars>
 try {
   env = validateEnvVars()
-  console.log('✅ Environment variables validated successfully')
+  if (!global.__nextauth_config_logged) {
+    console.log('✅ Environment variables validated successfully')
+  }
 } catch (error) {
   console.error('❌ Environment validation failed:', error)
   throw error
@@ -119,7 +127,9 @@ const getSalesforceUrl = (path: string): string => {
 // Safe authOptions creation
 export const authOptions: NextAuthOptions = (() => {
   try {
-    console.log('🔧 Creating NextAuth configuration...')
+    if (!global.__nextauth_config_logged) {
+      console.log('🔧 Creating NextAuth configuration...')
+    }
     return {
   providers: [
     {
@@ -156,8 +166,8 @@ export const authOptions: NextAuthOptions = (() => {
           token.accessToken = account.access_token || ''
           token.refreshToken = account.refresh_token || ''
           token.instanceUrl = (account.instance_url as string) || ''
-          token.userId = (profile as any).user_id || ''
-          token.organizationId = (profile as any).organization_id || ''
+          token.userId = (profile as Record<string, unknown>).user_id as string || ''
+          token.organizationId = (profile as Record<string, unknown>).organization_id as string || ''
           
           // Debug logging in development
           if (process.env.NODE_ENV === 'development') {
@@ -201,6 +211,21 @@ export const authOptions: NextAuthOptions = (() => {
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   pages: {
     signIn: '/auth/signin',

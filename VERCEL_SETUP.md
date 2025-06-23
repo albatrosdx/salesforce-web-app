@@ -18,6 +18,10 @@ NEXTAUTH_SECRET=your_secure_64_character_random_string_here
 NEXTAUTH_DEBUG=true
 ```
 
+**注意**: VercelではNEXTAUTH_URLを設定する際、末尾のスラッシュを含めないでください。
+例: `https://your-app.vercel.app` ✅ 
+例: `https://your-app.vercel.app/` ❌
+
 ### 3. アプリケーション設定
 ```
 NODE_ENV=production

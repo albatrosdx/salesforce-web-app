@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth/config'
 const handler = NextAuth(authOptions)
 
 // Add error handling wrapper
-const wrappedHandler = async (req: Request, context: any) => {
+const wrappedHandler = async (req: Request, context?: unknown) => {
   try {
     return await handler(req, context)
   } catch (error) {
