@@ -1,7 +1,4 @@
 import { NextAuthOptions } from 'next-auth'
-import { SalesforceAuth } from './salesforce'
-
-const salesforceAuth = new SalesforceAuth()
 
 // Environment variable validation
 const validateEnvVars = () => {
@@ -13,8 +10,8 @@ const validateEnvVars = () => {
   }
 
   const missing = Object.entries(required)
-    .filter(([_, value]) => !value)
-    .map(([key, _]) => key)
+    .filter(([, value]) => !value)
+    .map(([key]) => key)
 
   if (missing.length > 0) {
     throw new Error(

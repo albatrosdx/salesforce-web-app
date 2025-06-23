@@ -101,7 +101,7 @@ export function AccountSearch() {
           {/* 検索結果ヘッダー */}
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-900">
-              検索結果: "{debouncedSearchTerm}"
+              検索結果: &quot;{debouncedSearchTerm}&quot;
             </h2>
             {data && !isLoading && (
               <span className="text-sm text-gray-600">

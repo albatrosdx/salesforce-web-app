@@ -11,7 +11,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (status === 'loading') {

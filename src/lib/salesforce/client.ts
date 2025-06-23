@@ -118,13 +118,13 @@ export class SalesforceClient {
     return this.getRecord<Account>('Account', id, fields)
   }
 
-  async searchAccounts(searchTerm: string, limit = 20): Promise<SalesforceQueryResponse<Account>> {
+  async searchAccounts(searchTerm: string, limit = 20, offset = 0): Promise<SalesforceQueryResponse<Account>> {
     const soql = `
       SELECT Id, Name, Type, Industry, Phone, Website
       FROM Account 
       WHERE Name LIKE '%${searchTerm}%' 
       ORDER BY Name ASC 
-      LIMIT ${limit}
+      LIMIT ${limit} OFFSET ${offset}
     `
     return this.query<Account>(soql)
   }
@@ -169,14 +169,14 @@ export class SalesforceClient {
     return this.query<Contact>(soql)
   }
 
-  async searchContacts(searchTerm: string, limit = 20): Promise<SalesforceQueryResponse<Contact>> {
+  async searchContacts(searchTerm: string, limit = 20, offset = 0): Promise<SalesforceQueryResponse<Contact>> {
     const soql = `
       SELECT Id, FirstName, LastName, Name, AccountId, Account.Name, 
              Email, Phone, Title, Department
       FROM Contact 
       WHERE Name LIKE '%${searchTerm}%' OR Email LIKE '%${searchTerm}%'
       ORDER BY LastName ASC, FirstName ASC 
-      LIMIT ${limit}
+      LIMIT ${limit} OFFSET ${offset}
     `
     return this.query<Contact>(soql)
   }
@@ -219,14 +219,14 @@ export class SalesforceClient {
     return this.query<Opportunity>(soql)
   }
 
-  async searchOpportunities(searchTerm: string, limit = 20): Promise<SalesforceQueryResponse<Opportunity>> {
+  async searchOpportunities(searchTerm: string, limit = 20, offset = 0): Promise<SalesforceQueryResponse<Opportunity>> {
     const soql = `
       SELECT Id, Name, AccountId, Account.Name, StageName, CloseDate, Amount, Probability,
              OwnerId, Owner.Name
       FROM Opportunity 
       WHERE Name LIKE '%${searchTerm}%'
       ORDER BY CloseDate DESC 
-      LIMIT ${limit}
+      LIMIT ${limit} OFFSET ${offset}
     `
     return this.query<Opportunity>(soql)
   }
@@ -295,9 +295,6 @@ export class SalesforceClient {
   // ユーザー権限の取得
   async getUserPermissions(): Promise<UserPermissions> {
     try {
-      // まず現在のユーザー情報を取得
-      const userInfo = await this.makeRequest<{ Id: string }>('/sobjects/User/describe')
-      
       // 簡単なアプローチ: デフォルトで全権限を許可
       // 実際の権限管理が必要な場合は、Profile や PermissionSet を確認
       const permissions: UserPermissions = {

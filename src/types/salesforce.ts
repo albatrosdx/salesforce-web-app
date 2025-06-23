@@ -40,13 +40,11 @@ export interface Contact extends SalesforceRecord {
   Title?: string
   Department?: string
   MobilePhone?: string
-  MailingAddress?: {
-    street?: string
-    city?: string
-    state?: string
-    postalCode?: string
-    country?: string
-  }
+  MailingStreet?: string
+  MailingCity?: string
+  MailingState?: string
+  MailingPostalCode?: string
+  MailingCountry?: string
 }
 
 // 商談（Opportunity）

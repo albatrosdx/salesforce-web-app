@@ -14,11 +14,17 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    const contacts = await client.getContacts({
-      search,
-      page,
-      limit
-    })
+    // Calculate offset from page
+    const offset = (page - 1) * limit
+    
+    let contacts
+    if (search) {
+      // Use search functionality if search term provided
+      contacts = await client.searchContacts(search, limit, offset)
+    } else {
+      // Use regular getContacts method
+      contacts = await client.getContacts(limit, offset)
+    }
     
     return createApiResponse(contacts)
   } catch (error) {
