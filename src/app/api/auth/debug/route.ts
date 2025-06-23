@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
       SALESFORCE_CLIENT_SECRET: !!process.env.SALESFORCE_CLIENT_SECRET,
       NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET,
       NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+      NEXTAUTH_URL_INTERNAL: process.env.NEXTAUTH_URL_INTERNAL,
       NODE_ENV: process.env.NODE_ENV,
+      VERCEL: process.env.VERCEL,
+      VERCEL_URL: process.env.VERCEL_URL,
     }
     
     console.log('Environment variables:', envVars)
