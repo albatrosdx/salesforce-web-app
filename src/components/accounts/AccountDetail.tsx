@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Account, Contact, Opportunity } from '@/types'
 import { Card, CardContent, CardHeader, Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatAddress } from '@/utils'
+import { ActivityTimeline } from '@/components/activities/ActivityTimeline'
+import { useActivitiesByWhat } from '@/lib/salesforce/hooks'
 
 interface AccountDetailProps {
   account: Account
@@ -23,12 +25,19 @@ export function AccountDetail({
   onDelete 
 }: AccountDetailProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'contacts' | 'opportunities' | 'activities'>('details')
+  
+  // Fetch activities data for this account
+  const { data: activities, isLoading: activitiesLoading } = useActivitiesByWhat(account.Id)
 
   const tabs = [
     { id: 'details', label: '詳細', count: null },
     { id: 'contacts', label: '取引先責任者', count: contacts.length },
     { id: 'opportunities', label: '商談', count: opportunities.length },
-    { id: 'activities', label: '活動', count: null },
+    { 
+      id: 'activities', 
+      label: '活動', 
+      count: activities ? (activities.tasks.records.length + activities.events.records.length) : null 
+    },
   ] as const
 
   if (loading) {
@@ -286,12 +295,15 @@ export function AccountDetail({
             )}
 
             {activeTab === 'activities' && (
-              <div className="text-center py-8">
-                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <p className="text-gray-500">活動タイムライン機能は今後実装予定です</p>
-              </div>
+              <ActivityTimeline
+                tasks={activities?.tasks.records || []}
+                events={activities?.events.records || []}
+                loading={activitiesLoading}
+                onRefresh={() => {
+                  // Optional: Add refresh functionality
+                  window.location.reload()
+                }}
+              />
             )}
           </div>
         </CardContent>
