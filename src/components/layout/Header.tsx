@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { Menu, User, LogOut } from 'lucide-react'
 import { Button } from '../ui/Button'
+import Image from 'next/image'
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -42,9 +43,11 @@ export function Header({ onMenuClick }: HeaderProps) {
               <div className="relative group">
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                   {session.user.image ? (
-                    <img
+                    <Image
                       src={session.user.image}
                       alt={session.user.name || 'User'}
+                      width={32}
+                      height={32}
                       className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (

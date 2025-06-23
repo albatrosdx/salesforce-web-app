@@ -14,11 +14,17 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    const accounts = await client.getAccounts({
-      search,
-      page,
-      limit
-    })
+    // Calculate offset from page
+    const offset = (page - 1) * limit
+    
+    let accounts
+    if (search) {
+      // Use search functionality if search term provided
+      accounts = await client.searchAccounts(search, limit, offset)
+    } else {
+      // Use regular getAccounts method
+      accounts = await client.getAccounts(limit, offset)
+    }
     
     return createApiResponse(accounts)
   } catch (error) {

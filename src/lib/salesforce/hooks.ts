@@ -4,13 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useMemo, useState, useEffect } from 'react'
 import { SalesforceClient } from './client'
 import { 
-  Account, 
-  Contact, 
-  Opportunity, 
-  Task, 
-  Event, 
-  SalesforceQueryResponse,
-  UserPermissions,
   LoadingState 
 } from '@/types'
 

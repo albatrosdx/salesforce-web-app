@@ -11,26 +11,26 @@ export class SalesforceApiError extends Error {
     this.salesforceErrors = salesforceErrors
   }
 
-  static fromResponse(status: number, responseBody: any): SalesforceApiError {
+  static fromResponse(status: number, responseBody: unknown): SalesforceApiError {
     let message = `Salesforce API Error: ${status}`
     let errors: ApiError[] = []
 
     try {
       if (Array.isArray(responseBody)) {
-        errors = responseBody.map(error => ({
+        errors = responseBody.map((error: any) => ({
           message: error.message || 'Unknown error',
           errorCode: error.errorCode,
           fields: error.fields || []
         }))
         message = errors.map(e => e.message).join(', ')
-      } else if (responseBody?.message) {
-        message = responseBody.message
-        errors = [{ message: responseBody.message }]
+      } else if (responseBody && typeof responseBody === 'object' && 'message' in responseBody) {
+        message = String(responseBody.message)
+        errors = [{ message: String(responseBody.message) }]
       } else if (typeof responseBody === 'string') {
         message = responseBody
         errors = [{ message: responseBody }]
       }
-    } catch (parseError) {
+    } catch {
       message = `Failed to parse error response: ${status}`
       errors = [{ message }]
     }

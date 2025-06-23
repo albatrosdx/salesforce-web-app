@@ -33,7 +33,7 @@ export function AccountDetail({
   const { data: activities, isLoading: activitiesLoading } = useActivitiesByWhat(account.Id)
   
   // Check account permissions
-  const { canEditAccount, canDeleteAccount, canViewAccount } = useAccountPermissions()
+  const { canViewAccount } = useAccountPermissions()
   
   // If user cannot view accounts, show permission denied
   if (!canViewAccount) {

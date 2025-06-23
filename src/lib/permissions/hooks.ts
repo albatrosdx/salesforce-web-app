@@ -1,7 +1,7 @@
 'use client'
 
 import { usePermissions } from './PermissionProvider'
-import { ObjectType, PermissionAction } from './types'
+import { ObjectType } from './types'
 
 export function usePermissionCheck() {
   const { hasPermission, canAccessObject, permissions, loading, error } = usePermissions()

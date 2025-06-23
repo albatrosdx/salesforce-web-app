@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { SignInButton } from '@/components/auth'
 
 export default function HomePage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
 
   useEffect(() => {
