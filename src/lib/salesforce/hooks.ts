@@ -196,6 +196,20 @@ export function useOpportunitiesByAccount(accountId: string | null) {
   )
 }
 
+export function useOpportunitySearch(searchTerm: string, limit = 20) {
+  const client = useSalesforceClient()
+  
+  return useAsyncData(
+    () => {
+      if (!client || !searchTerm.trim()) {
+        return Promise.resolve({ records: [], totalSize: 0, done: true })
+      }
+      return client.searchOpportunities(searchTerm, limit)
+    },
+    [client, searchTerm, limit]
+  )
+}
+
 // Activity関連フック
 export function useActivitiesByWhat(whatId: string | null) {
   const client = useSalesforceClient()
