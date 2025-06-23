@@ -1,84 +1,43 @@
-'use client'
+import { Card, CardContent } from '@/components'
+import { Task, Event } from '@/types/salesforce'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, Button } from '@/components'
-import { salesforceClient } from '@/lib/salesforce/client'
-import { Task } from '@/types/salesforce'
+type Activity = (Task | Event) & { activityType: 'Task' | 'Event' }
 
-export default function ActivityDetailPage({ 
+async function getActivity(id: string): Promise<Activity | null> {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/salesforce/activities/${id}`,
+      { cache: 'no-store' }
+    )
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      throw new Error('Failed to fetch activity')
+    }
+    
+    return response.json()
+  } catch (error) {
+    console.error('Error fetching activity:', error)
+    return null
+  }
+}
+
+export default async function ActivityDetailPage({ 
   params 
 }: { 
   params: Promise<{ id: string }> 
 }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [activity, setActivity] = useState<Task | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [id, setId] = useState<string | null>(null)
-
-  useEffect(() => {
-    params.then(p => setId(p.id))
-  }, [params])
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-      return
-    }
-
-    if (session && id) {
-      fetchActivity()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status, id, router])
-
-  const fetchActivity = async () => {
-    try {
-      setLoading(true)
-      const client = salesforceClient(session!)
-      const result = await client.query<Task>(
-        `SELECT Id, Subject, Status, Type, Priority, ActivityDate, Description, 
-         Who.Name, What.Name, Owner.Name, CreatedDate, LastModifiedDate
-         FROM Task 
-         WHERE Id = '${id}'`
-      )
-      
-      if (result.records.length > 0) {
-        setActivity(result.records[0])
-      } else {
-        setError('活動が見つかりません')
-      }
-    } catch (err) {
-      console.error('Error fetching activity:', err)
-      setError('活動の取得中にエラーが発生しました')
-    } finally {
-      setLoading(false)
-    }
+  const { id } = await params
+  const activity = await getActivity(id)
+  
+  if (!activity) {
+    notFound()
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      </div>
-    )
-  }
-
-  if (error || !activity) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <p className="text-red-600">{error || '活動が見つかりません'}</p>
-          <Button onClick={() => router.back()} className="mt-4">
-            戻る
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -86,9 +45,12 @@ export default function ActivityDetailPage({
         <h1 className="text-2xl font-bold text-gray-900">
           {activity.Subject || '(件名なし)'}
         </h1>
-        <Button onClick={() => router.back()} variant="outline">
+        <Link 
+          href="/dashboard/activities" 
+          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+        >
           戻る
-        </Button>
+        </Link>
       </div>
 
       <Card>
@@ -96,23 +58,30 @@ export default function ActivityDetailPage({
           <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-medium text-gray-500">種類</dt>
-              <dd className="mt-1 text-sm text-gray-900">{activity.Type || 'その他'}</dd>
+              <dd className="mt-1 text-sm text-gray-900">{activity.activityType === 'Task' ? 'ToDo' : 'イベント'}</dd>
             </div>
             
             <div>
               <dt className="text-sm font-medium text-gray-500">ステータス</dt>
-              <dd className="mt-1 text-sm text-gray-900">{activity.Status}</dd>
+              <dd className="mt-1 text-sm text-gray-900">
+                {activity.activityType === 'Task' ? (activity as Task).Status : '予定'}
+              </dd>
             </div>
             
             <div>
               <dt className="text-sm font-medium text-gray-500">優先度</dt>
-              <dd className="mt-1 text-sm text-gray-900">{activity.Priority || '中'}</dd>
+              <dd className="mt-1 text-sm text-gray-900">
+                {activity.activityType === 'Task' ? (activity as Task).Priority || '中' : '-'}
+              </dd>
             </div>
             
             <div>
-              <dt className="text-sm font-medium text-gray-500">期日</dt>
+              <dt className="text-sm font-medium text-gray-500">日付</dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {activity.ActivityDate ? new Date(activity.ActivityDate).toLocaleDateString('ja-JP') : '-'}
+                {activity.activityType === 'Task' ? 
+                  ((activity as Task).ActivityDate ? new Date((activity as Task).ActivityDate!).toLocaleDateString('ja-JP') : '-') :
+                  ((activity as Event).StartDateTime ? new Date((activity as Event).StartDateTime!).toLocaleDateString('ja-JP') : '-')
+                }
               </dd>
             </div>
             
