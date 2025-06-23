@@ -1,6 +1,5 @@
 'use client'
 
-import { PageHeader, TabNavigation, opportunityTabs } from '@/components'
 import { OpportunityPipeline } from '@/components/opportunities'
 import { useOpportunities } from '@/lib/salesforce'
 
@@ -9,14 +8,12 @@ export default function OpportunityPipelinePage() {
   const { data, isLoading, error } = useOpportunities(200, 0)
 
   return (
-    <>
-      <PageHeader
-        title="商談パイプライン"
-        description="ステージ別の商談状況を視覚的に確認できます"
-      >
-        <TabNavigation tabs={opportunityTabs} />
-      </PageHeader>
-
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">商談パイプライン</h1>
+        <p className="text-gray-600 mt-1">ステージ別の商談状況を視覚的に確認できます</p>
+      </div>
+      
       {error ? (
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -51,6 +48,6 @@ export default function OpportunityPipelinePage() {
           loading={isLoading}
         />
       )}
-    </>
+    </div>
   )
 }

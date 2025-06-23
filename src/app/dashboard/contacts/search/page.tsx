@@ -1,19 +1,16 @@
 'use client'
 
-import { PageHeader, TabNavigation, contactTabs } from '@/components'
 import { ContactSearch } from '@/components/contacts'
 
 export default function ContactSearchPage() {
   return (
-    <>
-      <PageHeader
-        title="取引先責任者検索"
-        description="取引先責任者を氏名やメールアドレスで検索して、該当する取引先責任者を見つけます"
-      >
-        <TabNavigation tabs={contactTabs} />
-      </PageHeader>
-
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">取引先責任者検索</h1>
+        <p className="text-gray-600 mt-1">取引先責任者を氏名やメールアドレスで検索して、該当する取引先責任者を見つけます</p>
+      </div>
+      
       <ContactSearch />
-    </>
+    </div>
   )
 }
