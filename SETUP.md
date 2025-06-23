@@ -33,7 +33,13 @@ NODE_ENV=development
    - **API Name**: Salesforce_Web_App
    - **Contact Email**: あなたのメールアドレス
    - **Enable OAuth Settings**: チェック
-   - **Callback URL**: `http://localhost:3000/api/auth/callback`
+   - **Callback URL**: 以下のURLをすべて追加
+     ```
+     http://localhost:3000/api/auth/callback/salesforce
+     https://salesforce-web-app-teal.vercel.app/api/auth/callback/salesforce
+     https://salesforce-web-app.vercel.app/api/auth/callback/salesforce
+     https://[your-project-name].vercel.app/api/auth/callback/salesforce
+     ```
    - **Selected OAuth Scopes**:
      - Access your basic information (id, profile, email, address, phone)
      - Manage user data via APIs (api)
@@ -73,7 +79,7 @@ npm run dev
 1. **環境変数の確認**: `.env.local`ファイルの値が正しく設定されているか確認
 2. **Connected App設定**: Salesforce側のConnected App設定が正しいか確認
 3. **ドメインURL**: `SALESFORCE_INSTANCE_URL`がhttpsで始まり、末尾にスラッシュがないことを確認
-4. **コールバックURL**: Connected AppのCallback URLが`http://localhost:3000/api/auth/callback`に設定されているか確認
+4. **コールバックURL**: Connected AppのCallback URLに必要なURLがすべて登録されているか確認（開発環境とVercel環境の両方）
 
 #### よくあるエラー
 

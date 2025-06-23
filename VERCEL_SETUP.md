@@ -29,10 +29,28 @@ NODE_ENV=production
 
 ## Salesforce Connected App設定
 
-Salesforceで以下のCallback URLを許可してください：
+### 重要：Callback URLの設定
 
-1. 開発環境: `http://localhost:3000/api/auth/callback/salesforce`
-2. 本番環境: `https://your-vercel-app-url.vercel.app/api/auth/callback/salesforce`
+SalesforceのConnected Appで以下の**すべて**のCallback URLを許可してください：
+
+```
+http://localhost:3000/api/auth/callback/salesforce
+https://salesforce-web-app-teal.vercel.app/api/auth/callback/salesforce
+https://salesforce-web-app.vercel.app/api/auth/callback/salesforce
+https://[your-project-name].vercel.app/api/auth/callback/salesforce
+```
+
+**注意事項**：
+- Vercelの自動生成URLも含めて登録が必要です
+- プレビューデプロイメント用のURLも追加することを推奨
+- カスタムドメインを使用する場合はそのURLも追加
+
+### 設定手順：
+1. Salesforce設定 → アプリケーション → アプリケーションマネージャー
+2. 該当のConnected Appを編集
+3. 「Webアプリケーションの設定」セクション
+4. 「コールバックURL」に上記URLをすべて追加
+5. 保存
 
 ## 重要な注意事項
 
