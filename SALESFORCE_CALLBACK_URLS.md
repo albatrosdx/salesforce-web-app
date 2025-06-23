@@ -71,5 +71,5 @@ https://[salesforce-domain]/services/oauth2/authorize?
 Connected Appの現在の設定を確認するには、Salesforce CLIを使用：
 
 ```bash
-sfdx force:org:open -p /lightning/setup/ConnectedApplication/home
+sf org open -p /lightning/setup/ConnectedApplication/home
 ```
