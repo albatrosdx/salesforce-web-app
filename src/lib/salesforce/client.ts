@@ -219,6 +219,18 @@ export class SalesforceClient {
     return this.query<Opportunity>(soql)
   }
 
+  async searchOpportunities(searchTerm: string, limit = 20): Promise<SalesforceQueryResponse<Opportunity>> {
+    const soql = `
+      SELECT Id, Name, AccountId, Account.Name, StageName, CloseDate, Amount, Probability,
+             OwnerId, Owner.Name
+      FROM Opportunity 
+      WHERE Name LIKE '%${searchTerm}%'
+      ORDER BY CloseDate DESC 
+      LIMIT ${limit}
+    `
+    return this.query<Opportunity>(soql)
+  }
+
   // Activity関連メソッド（Task & Event）
   async getActivitiesByWhat(whatId: string): Promise<{
     tasks: SalesforceQueryResponse<Task>

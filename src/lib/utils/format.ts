@@ -88,3 +88,16 @@ export function formatNumber(num: number | null | undefined): string {
   
   return new Intl.NumberFormat('ja-JP').format(num)
 }
+
+/**
+ * パーセンテージフォーマット関数（確度など）
+ */
+export function formatPercentage(percentage: number | null | undefined): string {
+  if (percentage === null || percentage === undefined) return '-'
+  
+  return new Intl.NumberFormat('ja-JP', {
+    style: 'percent',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  }).format(percentage / 100)
+}
