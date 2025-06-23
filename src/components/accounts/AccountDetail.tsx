@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Account, Contact, Opportunity } from '@/types'
 import { Card, CardContent, CardHeader, Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatAddress } from '@/utils'
-import { ActivityTimeline } from '@/components/activities/ActivityTimeline'
+import { ActivityTimeline, ActivityCreateModal } from '@/components/activities'
 import { useActivitiesByWhat } from '@/lib/salesforce/hooks'
 
 interface AccountDetailProps {
@@ -25,6 +25,7 @@ export function AccountDetail({
   onDelete 
 }: AccountDetailProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'contacts' | 'opportunities' | 'activities'>('details')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   
   // Fetch activities data for this account
   const { data: activities, isLoading: activitiesLoading } = useActivitiesByWhat(account.Id)
@@ -295,19 +296,46 @@ export function AccountDetail({
             )}
 
             {activeTab === 'activities' && (
-              <ActivityTimeline
-                tasks={activities?.tasks.records || []}
-                events={activities?.events.records || []}
-                loading={activitiesLoading}
-                onRefresh={() => {
-                  // Optional: Add refresh functionality
-                  window.location.reload()
-                }}
-              />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">活動</h3>
+                  <Button onClick={() => setIsCreateModalOpen(true)}>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    新しい活動を作成
+                  </Button>
+                </div>
+                
+                <ActivityTimeline
+                  tasks={activities?.tasks.records || []}
+                  events={activities?.events.records || []}
+                  loading={activitiesLoading}
+                  onRefresh={() => {
+                    // Optional: Add refresh functionality
+                    window.location.reload()
+                  }}
+                />
+              </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Activity Creation Modal */}
+      <ActivityCreateModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={(activityId, activityType) => {
+          console.log(`Created ${activityType} with ID: ${activityId}`)
+          // Refresh activities data
+          window.location.reload()
+        }}
+        defaultValues={{
+          WhatId: account.Id,
+          Subject: `${account.Name}に関する活動`
+        }}
+      />
     </div>
   )
 }

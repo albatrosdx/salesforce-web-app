@@ -381,4 +381,61 @@ export class SalesforceClient {
         value: value.value
       }))
   }
+
+  // Activity作成メソッド
+  async createTask(taskData: {
+    Subject: string
+    Description?: string
+    ActivityDate: string
+    Priority?: 'High' | 'Normal' | 'Low'
+    Status?: 'Not Started' | 'In Progress' | 'Completed'
+    WhatId?: string
+    WhoId?: string
+    OwnerId?: string
+  }): Promise<{ id: string; success: boolean }> {
+    const data = {
+      Subject: taskData.Subject,
+      Description: taskData.Description || '',
+      ActivityDate: taskData.ActivityDate,
+      Priority: taskData.Priority || 'Normal',
+      Status: taskData.Status || 'Not Started',
+      ...(taskData.WhatId && { WhatId: taskData.WhatId }),
+      ...(taskData.WhoId && { WhoId: taskData.WhoId }),
+      ...(taskData.OwnerId && { OwnerId: taskData.OwnerId })
+    }
+    
+    return this.createRecord('Task', data)
+  }
+
+  async createEvent(eventData: {
+    Subject: string
+    Description?: string
+    StartDateTime: string
+    EndDateTime: string
+    Location?: string
+    WhatId?: string
+    WhoId?: string
+    OwnerId?: string
+  }): Promise<{ id: string; success: boolean }> {
+    const data = {
+      Subject: eventData.Subject,
+      Description: eventData.Description || '',
+      StartDateTime: eventData.StartDateTime,
+      EndDateTime: eventData.EndDateTime,
+      Location: eventData.Location || '',
+      ...(eventData.WhatId && { WhatId: eventData.WhatId }),
+      ...(eventData.WhoId && { WhoId: eventData.WhoId }),
+      ...(eventData.OwnerId && { OwnerId: eventData.OwnerId })
+    }
+    
+    return this.createRecord('Event', data)
+  }
+
+  async createActivity(activityType: 'Task' | 'Event', activityData: any): Promise<{ id: string; success: boolean }> {
+    if (activityType === 'Task') {
+      return this.createTask(activityData)
+    } else {
+      return this.createEvent(activityData)
+    }
+  }
 }

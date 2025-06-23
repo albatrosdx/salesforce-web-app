@@ -316,3 +316,124 @@ export function usePicklistValues(sobjectType: string, fieldName: string) {
     [client, sobjectType, fieldName]
   )
 }
+
+// Activity作成フック
+export function useCreateTask() {
+  const client = useSalesforceClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const createTask = async (taskData: {
+    Subject: string
+    Description?: string
+    ActivityDate: string
+    Priority?: 'High' | 'Normal' | 'Low'
+    Status?: 'Not Started' | 'In Progress' | 'Completed'
+    WhatId?: string
+    WhoId?: string
+    OwnerId?: string
+  }) => {
+    if (!client) {
+      setError('Salesforce client not available')
+      return null
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await client.createTask(taskData)
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMessage)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {
+    createTask,
+    isLoading,
+    error,
+    clearError: () => setError(null)
+  }
+}
+
+export function useCreateEvent() {
+  const client = useSalesforceClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const createEvent = async (eventData: {
+    Subject: string
+    Description?: string
+    StartDateTime: string
+    EndDateTime: string
+    Location?: string
+    WhatId?: string
+    WhoId?: string
+    OwnerId?: string
+  }) => {
+    if (!client) {
+      setError('Salesforce client not available')
+      return null
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await client.createEvent(eventData)
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMessage)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {
+    createEvent,
+    isLoading,
+    error,
+    clearError: () => setError(null)
+  }
+}
+
+export function useCreateActivity() {
+  const client = useSalesforceClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const createActivity = async (activityType: 'Task' | 'Event', activityData: any) => {
+    if (!client) {
+      setError('Salesforce client not available')
+      return null
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await client.createActivity(activityType, activityData)
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMessage)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {
+    createActivity,
+    isLoading,
+    error,
+    clearError: () => setError(null)
+  }
+}
