@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Account } from '@/types'
-import { Table, TableHeader, TableBody, TableRow, TableCell } from '../ui/Table'
 import { SearchInput } from '../ui/SearchInput'
 import { Pagination } from '../ui/Pagination'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
