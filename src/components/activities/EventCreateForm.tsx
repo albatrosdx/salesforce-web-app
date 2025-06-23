@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { Button, Input, TextArea } from '@/components/ui'
-import { useCreateEvent, useAccountSearch, useContactSearch, useOpportunitySearch } from '@/lib/salesforce/hooks'
+import { useCreateActivity } from '@/lib/salesforce/api-hooks'
+import { useAccountSearch, useContactSearch, useOpportunitySearch } from '@/lib/salesforce/hooks'
 
 interface EventCreateFormProps {
   onSuccess?: (eventId: string) => void
@@ -15,7 +16,7 @@ interface EventCreateFormProps {
 }
 
 export function EventCreateForm({ onSuccess, onCancel, defaultValues }: EventCreateFormProps) {
-  const { createEvent, isLoading, error, clearError } = useCreateEvent()
+  const { createActivity, isLoading, error, clearError } = useCreateActivity()
   
   const [formData, setFormData] = useState({
     Subject: defaultValues?.Subject || '',
@@ -71,7 +72,7 @@ export function EventCreateForm({ onSuccess, onCancel, defaultValues }: EventCre
       return
     }
 
-    const result = await createEvent({
+    const result = await createActivity('Event', {
       Subject: formData.Subject,
       Description: formData.Description || undefined,
       StartDateTime: formData.StartDateTime,

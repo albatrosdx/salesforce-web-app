@@ -7,7 +7,7 @@ import { Button } from '@/components/ui'
 import { formatDate, formatPhone } from '@/lib/utils/format'
 import { ActivityTimeline, ActivityCreateModal } from '@/components/activities'
 import { EditPermissionGate, DeletePermissionGate, CreatePermissionGate, PermissionDenied } from '@/components/permissions'
-import { useActivitiesByWho } from '@/lib/salesforce/hooks'
+import { useActivitiesByWho } from '@/lib/salesforce/api-hooks'
 import { useContactPermissions } from '@/lib/permissions/hooks'
 
 interface ContactDetailProps {

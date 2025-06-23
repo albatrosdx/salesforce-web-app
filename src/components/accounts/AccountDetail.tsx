@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatAddress } from '@/utils'
 import { ActivityTimeline, ActivityCreateModal } from '@/components/activities'
 import { EditPermissionGate, DeletePermissionGate, CreatePermissionGate, PermissionDenied } from '@/components/permissions'
-import { useActivitiesByWhat } from '@/lib/salesforce/hooks'
+import { useActivitiesByWhat } from '@/lib/salesforce/api-hooks'
 import { useAccountPermissions } from '@/lib/permissions/hooks'
 
 interface AccountDetailProps {
