@@ -1,11 +1,27 @@
 'use client'
 
+import { useState } from 'react'
 import { PageHeader, TabNavigation, contactTabs, CreateButton } from '@/components'
+import { ContactList } from '@/components/contacts'
+import { useContacts } from '@/lib/salesforce'
 
 export default function ContactsPage() {
+  const [page, setPage] = useState(0)
+  const limit = 20
+  const { data, isLoading, error } = useContacts(limit, page * limit)
+
   const handleCreateContact = () => {
     // TODO: Implement contact creation
     console.log('Create new contact')
+  }
+
+  const handleRefresh = () => {
+    // リフレッシュロジックはuseContactsフックが自動的に処理
+    window.location.reload()
+  }
+
+  const handleLoadMore = () => {
+    setPage(prev => prev + 1)
   }
 
   return (
@@ -22,34 +38,40 @@ export default function ContactsPage() {
         <TabNavigation tabs={contactTabs} />
       </PageHeader>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">取引先責任者データ</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Salesforceに接続して取引先責任者データを表示します。
-            </p>
-            <div className="mt-6">
-              <CreateButton onClick={handleCreateContact}>
-                新規取引先責任者を作成
+      {error ? (
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-red-400 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">データ取得エラー</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <CreateButton onClick={handleRefresh}>
+                再試行
               </CreateButton>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <ContactList
+          contacts={data?.records || []}
+          loading={isLoading}
+          onRefresh={handleRefresh}
+          onLoadMore={data?.done ? undefined : handleLoadMore}
+          hasMore={!data?.done}
+        />
+      )}
     </>
   )
 }

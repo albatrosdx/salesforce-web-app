@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.3",
     "@types/react": "^19.1.8",
