@@ -54,7 +54,8 @@
       "Bash(git revert:*)",
       "Bash(gh:*)",
       "Bash(npx create-next-app:*)",
-      "Bash(npm init:*)"
+      "Bash(npm init:*)",
+      "Bash(git pr create:*)"
     ],
     "deny": [
       "Bash(git push origin main:*)"
