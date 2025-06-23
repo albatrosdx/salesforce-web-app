@@ -6,7 +6,9 @@ import { Opportunity } from '@/types'
 import { Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatPercentage } from '@/lib/utils/format'
 import { ActivityTimeline, ActivityCreateModal } from '@/components/activities'
+import { EditPermissionGate, DeletePermissionGate, CreatePermissionGate, PermissionDenied } from '@/components/permissions'
 import { useActivitiesByWhat } from '@/lib/salesforce/hooks'
+import { useOpportunityPermissions } from '@/lib/permissions/hooks'
 
 interface OpportunityDetailProps {
   opportunity: Opportunity
@@ -26,6 +28,14 @@ export function OpportunityDetail({
   
   // Fetch activities data for this opportunity
   const { data: activities, isLoading: activitiesLoading } = useActivitiesByWhat(opportunity.Id)
+  
+  // Check opportunity permissions
+  const { canViewOpportunity } = useOpportunityPermissions()
+  
+  // If user cannot view opportunities, show permission denied
+  if (!canViewOpportunity) {
+    return <PermissionDenied object="opportunities" action="read" />
+  }
 
   const getStageColor = (stage: string) => {
     switch (stage) {
@@ -118,22 +128,26 @@ export function OpportunityDetail({
             )}
           </div>
           <div className="flex space-x-3">
-            {onEdit && (
-              <Button onClick={onEdit} variant="outline">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                編集
-              </Button>
-            )}
-            {onDelete && (
-              <Button onClick={onDelete} variant="outline" className="text-red-600 hover:text-red-800">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                削除
-              </Button>
-            )}
+            <EditPermissionGate object="opportunities">
+              {onEdit && (
+                <Button onClick={onEdit} variant="outline">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  編集
+                </Button>
+              )}
+            </EditPermissionGate>
+            <DeletePermissionGate object="opportunities">
+              {onDelete && (
+                <Button onClick={onDelete} variant="outline" className="text-red-600 hover:text-red-800">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  削除
+                </Button>
+              )}
+            </DeletePermissionGate>
           </div>
         </div>
       </div>
@@ -294,12 +308,14 @@ export function OpportunityDetail({
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-gray-900">活動</h3>
-              <Button onClick={() => setIsCreateModalOpen(true)}>
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                新しい活動を作成
-              </Button>
+              <CreatePermissionGate object="activities">
+                <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  新しい活動を作成
+                </Button>
+              </CreatePermissionGate>
             </div>
             
             <ActivityTimeline
