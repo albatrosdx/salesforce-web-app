@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, Button } from '@/components'
 import { salesforceClient } from '@/lib/salesforce/client'
-import { SalesforceActivity } from '@/types/salesforce'
+import { Task } from '@/types/salesforce'
 
 export default function ActivitiesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [activities, setActivities] = useState<SalesforceActivity[]>([])
+  const [activities, setActivities] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,7 +31,7 @@ export default function ActivitiesPage() {
     try {
       setLoading(true)
       const client = salesforceClient(session!)
-      const result = await client.query<SalesforceActivity>(
+      const result = await client.query<Task>(
         `SELECT Id, Subject, Status, Type, ActivityDate, Description, 
          Who.Name, What.Name, Owner.Name, CreatedDate 
          FROM Task 

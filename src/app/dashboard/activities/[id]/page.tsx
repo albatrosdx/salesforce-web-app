@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, Button } from '@/components'
 import { salesforceClient } from '@/lib/salesforce/client'
-import { SalesforceActivity } from '@/types/salesforce'
+import { Task } from '@/types/salesforce'
 
 export default function ActivityDetailPage({ 
   params 
@@ -14,7 +14,7 @@ export default function ActivityDetailPage({
 }) {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [activity, setActivity] = useState<SalesforceActivity | null>(null)
+  const [activity, setActivity] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [id, setId] = useState<string | null>(null)
@@ -39,10 +39,9 @@ export default function ActivityDetailPage({
     try {
       setLoading(true)
       const client = salesforceClient(session!)
-      const result = await client.query<SalesforceActivity>(
+      const result = await client.query<Task>(
         `SELECT Id, Subject, Status, Type, Priority, ActivityDate, Description, 
-         Who.Name, What.Name, Owner.Name, CreatedDate, LastModifiedDate,
-         CreatedBy.Name, LastModifiedBy.Name
+         Who.Name, What.Name, Owner.Name, CreatedDate, LastModifiedDate
          FROM Task 
          WHERE Id = '${id}'`
       )
@@ -144,23 +143,9 @@ export default function ActivityDetailPage({
             </div>
             
             <div>
-              <dt className="text-sm font-medium text-gray-500">作成者</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {activity.CreatedBy?.Name || '-'}
-              </dd>
-            </div>
-            
-            <div>
               <dt className="text-sm font-medium text-gray-500">最終更新日時</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {activity.LastModifiedDate ? new Date(activity.LastModifiedDate).toLocaleString('ja-JP') : '-'}
-              </dd>
-            </div>
-            
-            <div>
-              <dt className="text-sm font-medium text-gray-500">最終更新者</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {activity.LastModifiedBy?.Name || '-'}
               </dd>
             </div>
           </dl>
