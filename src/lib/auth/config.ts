@@ -4,77 +4,123 @@ declare global {
   var __nextauth_config_logged: boolean | undefined
 }
 
-// Environment variable validation
+// Environment variable validation with better error handling
 const validateEnvVars = () => {
-  const required = {
-    SALESFORCE_INSTANCE_URL: process.env.SALESFORCE_INSTANCE_URL?.trim(),
-    SALESFORCE_CLIENT_ID: process.env.SALESFORCE_CLIENT_ID?.trim(),
-    SALESFORCE_CLIENT_SECRET: process.env.SALESFORCE_CLIENT_SECRET?.trim(),
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET?.trim(),
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL?.trim(),
-  }
-
-  const missing = Object.entries(required)
-    .filter(([, value]) => !value)
-    .map(([key]) => key)
-
-  if (missing.length > 0) {
-    const errorMsg = `Missing required environment variables: ${missing.join(', ')}\n` +
-      'Please check your environment variables and ensure all credentials are properly configured.\n' +
-      `Current environment: ${process.env.NODE_ENV}\n` +
-      `Available vars: ${Object.keys(process.env).filter(k => k.startsWith('SALESFORCE_') || k.startsWith('NEXTAUTH_')).join(', ')}`
-    console.error(errorMsg)
-    throw new Error(errorMsg)
-  }
-
-  // Additional URL validation for SALESFORCE_INSTANCE_URL
-  if (required.SALESFORCE_INSTANCE_URL) {
-    try {
-      new URL(required.SALESFORCE_INSTANCE_URL)
-    } catch {
-      throw new Error(
-        `Invalid SALESFORCE_INSTANCE_URL: ${required.SALESFORCE_INSTANCE_URL}\n` +
-        'Please ensure the URL is properly formatted (e.g., https://your-domain.my.salesforce.com)'
-      )
+  try {
+    const required = {
+      SALESFORCE_INSTANCE_URL: process.env.SALESFORCE_INSTANCE_URL?.trim(),
+      SALESFORCE_CLIENT_ID: process.env.SALESFORCE_CLIENT_ID?.trim(),
+      SALESFORCE_CLIENT_SECRET: process.env.SALESFORCE_CLIENT_SECRET?.trim(),
+      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET?.trim(),
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL?.trim(),
     }
-  }
 
-  // Additional URL validation for NEXTAUTH_URL
-  if (required.NEXTAUTH_URL) {
-    try {
-      new URL(required.NEXTAUTH_URL)
-    } catch {
-      throw new Error(
-        `Invalid NEXTAUTH_URL: ${required.NEXTAUTH_URL}\n` +
-        'Please ensure the URL is properly formatted (e.g., https://your-app.vercel.app)'
-      )
+    const missing = Object.entries(required)
+      .filter(([, value]) => !value)
+      .map(([key]) => key)
+
+    // Log environment state for debugging
+    console.log('=== Environment Variables Check ===')
+    console.log('NODE_ENV:', process.env.NODE_ENV)
+    console.log('Available environment variables:', Object.keys(process.env).filter(k => k.startsWith('SALESFORCE_') || k.startsWith('NEXTAUTH_')))
+    
+    if (missing.length > 0) {
+      const errorMsg = `Missing required environment variables: ${missing.join(', ')}\n` +
+        'Please check your environment variables and ensure all credentials are properly configured.\n' +
+        `Current environment: ${process.env.NODE_ENV}\n` +
+        `Available vars: ${Object.keys(process.env).filter(k => k.startsWith('SALESFORCE_') || k.startsWith('NEXTAUTH_')).join(', ')}`
+      console.error(errorMsg)
+      
+      // In development, provide fallback values to prevent complete failure
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Development mode: Using fallback values for missing variables')
+        return {
+          SALESFORCE_INSTANCE_URL: required.SALESFORCE_INSTANCE_URL || 'https://fallback.salesforce.com',
+          SALESFORCE_CLIENT_ID: required.SALESFORCE_CLIENT_ID || 'fallback_client_id',
+          SALESFORCE_CLIENT_SECRET: required.SALESFORCE_CLIENT_SECRET || 'fallback_client_secret',
+          NEXTAUTH_SECRET: required.NEXTAUTH_SECRET || 'fallback_secret_for_development_only',
+          NEXTAUTH_URL: required.NEXTAUTH_URL || 'http://localhost:3000',
+        }
+      }
+      
+      throw new Error(errorMsg)
     }
-  }
 
-  // Log configuration once for debugging
-  if (process.env.NODE_ENV === 'production' && !global.__nextauth_config_logged) {
-    console.log('NextAuth Configuration:')
-    console.log('- SALESFORCE_INSTANCE_URL:', required.SALESFORCE_INSTANCE_URL?.substring(0, 30) + '...')
-    console.log('- NEXTAUTH_URL:', required.NEXTAUTH_URL)
-    console.log('- CLIENT_ID configured:', !!required.SALESFORCE_CLIENT_ID)
-    console.log('- CLIENT_SECRET configured:', !!required.SALESFORCE_CLIENT_SECRET)
-    console.log('- NEXTAUTH_SECRET configured:', !!required.NEXTAUTH_SECRET)
-    global.__nextauth_config_logged = true
-  }
+    // Additional URL validation for SALESFORCE_INSTANCE_URL
+    if (required.SALESFORCE_INSTANCE_URL && required.SALESFORCE_INSTANCE_URL !== 'https://fallback.salesforce.com') {
+      try {
+        new URL(required.SALESFORCE_INSTANCE_URL)
+      } catch {
+        console.error(`Invalid SALESFORCE_INSTANCE_URL: ${required.SALESFORCE_INSTANCE_URL}`)
+        if (process.env.NODE_ENV !== 'development') {
+          throw new Error(
+            `Invalid SALESFORCE_INSTANCE_URL: ${required.SALESFORCE_INSTANCE_URL}\n` +
+            'Please ensure the URL is properly formatted (e.g., https://your-domain.my.salesforce.com)'
+          )
+        }
+      }
+    }
 
-  return required
+    // Additional URL validation for NEXTAUTH_URL
+    if (required.NEXTAUTH_URL && required.NEXTAUTH_URL !== 'http://localhost:3000') {
+      try {
+        new URL(required.NEXTAUTH_URL)
+      } catch {
+        console.error(`Invalid NEXTAUTH_URL: ${required.NEXTAUTH_URL}`)
+        if (process.env.NODE_ENV !== 'development') {
+          throw new Error(
+            `Invalid NEXTAUTH_URL: ${required.NEXTAUTH_URL}\n` +
+            'Please ensure the URL is properly formatted (e.g., https://your-app.vercel.app)'
+          )
+        }
+      }
+    }
+
+    // Log configuration once for debugging
+    if (process.env.NODE_ENV === 'production' && !global.__nextauth_config_logged) {
+      console.log('NextAuth Configuration:')
+      console.log('- SALESFORCE_INSTANCE_URL:', required.SALESFORCE_INSTANCE_URL?.substring(0, 30) + '...')
+      console.log('- NEXTAUTH_URL:', required.NEXTAUTH_URL)
+      console.log('- CLIENT_ID configured:', !!required.SALESFORCE_CLIENT_ID)
+      console.log('- CLIENT_SECRET configured:', !!required.SALESFORCE_CLIENT_SECRET)
+      console.log('- NEXTAUTH_SECRET configured:', !!required.NEXTAUTH_SECRET)
+      global.__nextauth_config_logged = true
+    }
+
+    return required
+  } catch (error) {
+    console.error('Environment validation failed:', error)
+    throw error
+  }
 }
 
-const env = validateEnvVars()
+// Safe environment validation
+let env: any
+try {
+  env = validateEnvVars()
+  console.log('✅ Environment variables validated successfully')
+} catch (error) {
+  console.error('❌ Environment validation failed:', error)
+  throw error
+}
 
 // Helper function to construct Salesforce URLs safely
 const getSalesforceUrl = (path: string): string => {
-  const baseUrl = env.SALESFORCE_INSTANCE_URL!.replace(/\/+$/, '') // Remove trailing slashes
-  const cleanPath = path.startsWith('/') ? path : `/${path}`
-  return `${baseUrl}${cleanPath}`
+  try {
+    const baseUrl = env.SALESFORCE_INSTANCE_URL!.replace(/\/+$/, '') // Remove trailing slashes
+    const cleanPath = path.startsWith('/') ? path : `/${path}`
+    return `${baseUrl}${cleanPath}`
+  } catch (error) {
+    console.error('Failed to construct Salesforce URL:', error)
+    throw new Error(`Failed to construct Salesforce URL for path: ${path}`)
+  }
 }
 
-export const authOptions: NextAuthOptions = {
+// Safe authOptions creation
+export const authOptions: NextAuthOptions = (() => {
+  try {
+    console.log('🔧 Creating NextAuth configuration...')
+    return {
   providers: [
     {
       id: 'salesforce',
@@ -175,6 +221,11 @@ export const authOptions: NextAuthOptions = {
     },
   },
 }
+  } catch (error) {
+    console.error('❌ Failed to create NextAuth configuration:', error)
+    throw new Error(`NextAuth configuration failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+})()
 
 // セッション型の拡張
 declare module 'next-auth' {

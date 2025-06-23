@@ -134,11 +134,42 @@ git branch -D <branch-name>
 git branch -a
 ```
 
+### ブランチ管理の完全なワークフロー
+**【絶対必須】** 作業開始前の必須チェック手順を実行した後、以下の順序で作業を進めてください：
+
+1. **mainブランチからの新規ブランチ作成**
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/your-feature-name
+```
+
+2. **作業実施とコミット**
+```bash
+# 作業を実施
+git add -A
+git commit -m "descriptive commit message"
+```
+
+3. **プッシュとプルリクエスト作成**
+```bash
+git push -u origin feature/your-feature-name
+gh pr create --title "PR Title" --body "PR Description"
+```
+
+4. **mainブランチに戻る**
+```bash
+git checkout main
+```
+
 ### 重要事項
+- **絶対にmainブランチに直接コミットしない**
 - 作業開始前に必ずプリワークチェックリストを実行
 - 削除されたリモートブランチに対応するローカルブランチは必ず削除
 - 新規ブランチ作成前にブランチ存在確認
 - ローカルとリモートのブランチ状況を同期
+- **全ての作業は必ずfeatureブランチで実施し、プルリクエストを作成する**
+- **作業完了後は必ずmainブランチに戻る**
 
 ## API統合パターン
 
