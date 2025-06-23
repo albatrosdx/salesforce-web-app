@@ -392,4 +392,25 @@ export class SalesforceClient {
       return this.createEvent(activityData)
     }
   }
+
+  // 簡易メソッドエイリアス
+  async create(sobjectType: string, data: Record<string, any>): Promise<{ id: string; success: boolean }> {
+    return this.createRecord(sobjectType, data)
+  }
+
+  async update(sobjectType: string, id: string, data: Record<string, any>): Promise<void> {
+    return this.updateRecord(sobjectType, id, data)
+  }
+
+  async delete(sobjectType: string, id: string): Promise<void> {
+    return this.deleteRecord(sobjectType, id)
+  }
+}
+
+// セッションから Salesforce クライアントを作成する関数
+export function salesforceClient(session: any): SalesforceClient {
+  if (!session?.instanceUrl || !session?.accessToken) {
+    throw new Error('Invalid session: Missing instanceUrl or accessToken')
+  }
+  return new SalesforceClient(session.instanceUrl, session.accessToken)
 }

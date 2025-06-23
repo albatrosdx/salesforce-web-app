@@ -72,6 +72,7 @@ export interface Task extends SalesforceRecord {
   Subject: string
   Status: string
   Priority?: string
+  Type?: string
   ActivityDate?: string
   WhatId?: string // Account、Opportunity等のID
   WhoId?: string // Contact、Lead等のID
