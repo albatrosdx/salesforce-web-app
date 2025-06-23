@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Opportunity } from '@/types'  
 import { Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatPercentage } from '@/lib/utils/format'
-import { ActivityTimeline } from '@/components/activities/ActivityTimeline'
+import { ActivityTimeline, ActivityCreateModal } from '@/components/activities'
 import { useActivitiesByWhat } from '@/lib/salesforce/hooks'
 
 interface OpportunityDetailProps {
@@ -22,6 +22,7 @@ export function OpportunityDetail({
   onDelete 
 }: OpportunityDetailProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'activities' | 'other'>('details')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   
   // Fetch activities data for this opportunity
   const { data: activities, isLoading: activitiesLoading } = useActivitiesByWhat(opportunity.Id)
@@ -290,15 +291,27 @@ export function OpportunityDetail({
         )}
 
         {activeTab === 'activities' && (
-          <ActivityTimeline
-            tasks={activities?.tasks.records || []}
-            events={activities?.events.records || []}
-            loading={activitiesLoading}
-            onRefresh={() => {
-              // Optional: Add refresh functionality
-              window.location.reload()
-            }}
-          />
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">活動</h3>
+              <Button onClick={() => setIsCreateModalOpen(true)}>
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                新しい活動を作成
+              </Button>
+            </div>
+            
+            <ActivityTimeline
+              tasks={activities?.tasks.records || []}
+              events={activities?.events.records || []}
+              loading={activitiesLoading}
+              onRefresh={() => {
+                // Optional: Add refresh functionality
+                window.location.reload()
+              }}
+            />
+          </div>
         )}
 
         {activeTab === 'other' && (
@@ -323,6 +336,21 @@ export function OpportunityDetail({
           </div>
         )}
       </div>
+
+      {/* Activity Creation Modal */}
+      <ActivityCreateModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={(activityId, activityType) => {
+          console.log(`Created ${activityType} with ID: ${activityId}`)
+          // Refresh activities data
+          window.location.reload()
+        }}
+        defaultValues={{
+          WhatId: opportunity.Id,
+          Subject: `${opportunity.Name}に関する活動`
+        }}
+      />
     </div>
   )
 }
