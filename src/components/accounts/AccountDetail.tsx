@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Account, Contact, Opportunity } from '@/types'
 import { Card, CardContent, CardHeader, Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatAddress } from '@/utils'
@@ -242,9 +243,11 @@ export function AccountDetail({
                               <p className="text-sm text-gray-600">{contact.Phone}</p>
                             )}
                           </div>
-                          <Button variant="outline" size="sm">
-                            詳細
-                          </Button>
+                          <Link href={`/dashboard/contacts/${contact.Id}`}>
+                            <Button variant="outline" size="sm">
+                              詳細
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     ))}
@@ -291,9 +294,11 @@ export function AccountDetail({
                               <span className="font-medium">完了予定日:</span> {formatDate(opportunity.CloseDate)}
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">
-                            詳細
-                          </Button>
+                          <Link href={`/dashboard/opportunities/${opportunity.Id}`}>
+                            <Button variant="outline" size="sm">
+                              詳細
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     ))}
