@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { SignInButton } from '@/components/auth'
+import { PermissionBadge } from '@/components/permissions'
 import { classNames } from '@/utils'
 
 const navigation = [
@@ -49,7 +50,8 @@ export function Header() {
           </nav>
 
           {/* User menu */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <PermissionBadge compact showDetails />
             <SignInButton />
           </div>
         </div>
