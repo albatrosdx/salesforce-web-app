@@ -151,13 +151,21 @@ git add -A
 git commit -m "descriptive commit message"
 ```
 
-3. **プッシュとプルリクエスト作成**
+3. **ビルドエラーチェック**
+```bash
+# 【重要】push前に必ずビルドを実行してエラーがないことを確認
+npm run build
+
+# ビルドエラーがある場合は修正してから次に進む
+```
+
+4. **プッシュとプルリクエスト作成**
 ```bash
 git push -u origin feature/your-feature-name
 gh pr create --title "PR Title" --body "PR Description"
 ```
 
-4. **mainブランチに戻る**
+5. **mainブランチに戻る**
 ```bash
 git checkout main
 ```
@@ -168,6 +176,7 @@ git checkout main
 - 削除されたリモートブランチに対応するローカルブランチは必ず削除
 - 新規ブランチ作成前にブランチ存在確認
 - ローカルとリモートのブランチ状況を同期
+- **push前に必ずビルドを実行してエラーがないことを確認する**
 - **全ての作業は必ずfeatureブランチで実施し、プルリクエストを作成する**
 - **作業完了後は必ずmainブランチに戻る**
 
