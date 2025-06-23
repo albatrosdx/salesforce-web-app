@@ -46,7 +46,10 @@ export function Sidebar({ onClose }: SidebarProps) {
   )
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
+    <div className="flex flex-col h-full bg-white border-r border-gray-200 border-l-4 border-l-green-500">
+      {/* デバッグ: Sidebarが表示されていることを明確に */}
+      <div className="bg-green-500 text-white text-center py-1 text-xs">✓ MODERN SIDEBAR ACTIVE</div>
+      
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">メニュー</h2>

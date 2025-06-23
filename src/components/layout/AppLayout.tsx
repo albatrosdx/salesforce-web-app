@@ -11,8 +11,11 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // デバッグ用: セッション状態をログ出力
+  console.log('AppLayout session status:', status, 'session:', session)
 
   if (status === 'loading') {
     return <LoadingSpinner />
@@ -22,8 +25,13 @@ export function AppLayout({ children }: AppLayoutProps) {
     return <>{children}</>
   }
 
+  // 認証済みの場合は必ずサイドバーレイアウトを表示
   return (
     <div className="h-screen flex bg-gray-50">
+      {/* デバッグ: 認証状態を画面に表示 */}
+      <div className="fixed top-0 right-0 z-50 bg-red-500 text-white p-2 text-xs">
+        Status: {status} | Session: {session?.user?.email || 'N/A'}
+      </div>
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
         <div className="flex flex-col w-64">
