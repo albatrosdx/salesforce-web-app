@@ -17,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ja">
-      <body className={inter.className}>
+    <html lang="ja" className={inter.className}>
+      <body className="antialiased">
         <AuthProvider>
           <PermissionProvider>
             <div className="min-h-screen bg-gray-50">
