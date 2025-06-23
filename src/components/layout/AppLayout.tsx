@@ -11,7 +11,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (status === 'loading') {
@@ -22,6 +22,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     return <>{children}</>
   }
 
+  // 認証済みの場合は必ずサイドバーレイアウトを表示
   return (
     <div className="h-screen flex bg-gray-50">
       {/* Desktop Sidebar */}
