@@ -88,14 +88,14 @@ export function Sidebar({ onClose }: SidebarProps) {
   ]
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white">
+    <div className="sidebar">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 bg-gray-800">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">SF</span>
+      <div className="sidebar-header">
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-icon">
+            SF
           </div>
-          <h2 className="text-lg font-semibold">Salesforce App</h2>
+          <h2 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>Salesforce App</h2>
         </div>
         {onClose && (
           <Button variant="ghost" size="sm" onClick={onClose} className="lg:hidden text-white hover:bg-gray-700">
@@ -105,11 +105,11 @@ export function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="sidebar-nav">
         {loading ? (
-          <div className="space-y-2">
+          <div style={{ padding: '8px' }}>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-10 bg-gray-700 rounded animate-pulse" />
+              <div key={i} style={{ height: '40px', backgroundColor: '#475569', borderRadius: '6px', marginBottom: '8px' }} />
             ))}
           </div>
         ) : (
@@ -122,21 +122,24 @@ export function Sidebar({ onClose }: SidebarProps) {
             if (filteredItems.length === 0) return null
 
             return (
-              <div key={section.id} className="space-y-1">
+              <div key={section.id} className="sidebar-section">
                 <button
                   onClick={() => toggleSection(section.id)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white rounded-md transition-colors"
+                  className="sidebar-section-header"
                 >
                   <span>{section.label}</span>
                   <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${
-                      isExpanded ? 'transform rotate-180' : ''
-                    }`}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      transition: 'transform 0.2s',
+                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }}
                   />
                 </button>
                 
                 {isExpanded && (
-                  <div className="space-y-1 ml-3">
+                  <div className="sidebar-items">
                     {filteredItems.map((item) => {
                       const isActive = pathname === item.href || 
                         (item.href !== '/dashboard' && pathname.startsWith(item.href))
@@ -147,19 +150,13 @@ export function Sidebar({ onClose }: SidebarProps) {
                           key={item.name}
                           href={item.href}
                           onClick={onClose}
-                          className={`
-                            group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all
-                            ${isActive
-                              ? 'bg-blue-600 text-white shadow-sm'
-                              : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                            }
-                          `}
+                          className={`sidebar-item ${isActive ? 'active' : ''}`}
                         >
                           <Icon 
-                            className={`
-                              mr-3 h-4 w-4 transition-colors
-                              ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'}
-                            `}
+                            style={{
+                              width: '16px',
+                              height: '16px'
+                            }}
                           />
                           {item.name}
                         </Link>
@@ -188,8 +185,8 @@ export function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-800">
-        <div className="text-xs text-gray-400">
+      <div className="sidebar-footer">
+        <div>
           Salesforce Web App v1.0
         </div>
       </div>
