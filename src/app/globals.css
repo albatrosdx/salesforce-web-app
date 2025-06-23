@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* カスタムスタイル */
+@layer components {
+  .btn-primary {
+    @apply bg-salesforce-blue hover:bg-salesforce-darkblue text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  }
+  
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-salesforce-blue focus:border-transparent;
+  }
+  
+  .tab-active {
+    @apply border-b-2 border-salesforce-blue text-salesforce-blue;
+  }
+  
+  .tab-inactive {
+    @apply text-gray-500 hover:text-gray-700;
+  }
+}
