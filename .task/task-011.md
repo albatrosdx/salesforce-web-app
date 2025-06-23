@@ -166,17 +166,17 @@ interface EventCreateFields {
 - **場所**: 0-255文字
 
 ## 完了条件
-- [ ] ブランチ管理ルールに従った開発
-- [ ] TaskCreateFormコンポーネントの実装
-- [ ] EventCreateFormコンポーネントの実装
-- [ ] ActivityCreateModalコンポーネントの実装
-- [ ] SalesforceClient の活動作成メソッド実装
-- [ ] React Hooks の活動作成フック実装
-- [ ] 各詳細ページでの作成ボタン統合
-- [ ] フォームバリデーションの実装
-- [ ] エラーハンドリングの実装
-- [ ] TypeScript型チェック通過
-- [ ] レスポンシブデザインの実装
+- [x] ブランチ管理ルールに従った開発
+- [x] TaskCreateFormコンポーネントの実装
+- [x] EventCreateFormコンポーネントの実装
+- [x] ActivityCreateModalコンポーネントの実装
+- [x] SalesforceClient の活動作成メソッド実装
+- [x] React Hooks の活動作成フック実装
+- [x] 各詳細ページでの作成ボタン統合
+- [x] フォームバリデーションの実装
+- [x] エラーハンドリングの実装
+- [x] TypeScript型チェック通過
+- [x] レスポンシブデザインの実装
 
 ## 今後の拡張予定
 - 活動テンプレート機能
@@ -192,3 +192,12 @@ interface EventCreateFields {
 
 ## 開始日時
 2025-06-23
+
+## 完了日時
+2025-06-23
+
+## 実装完了
+Task 011は正常に完了しました。活動作成機能が全ての詳細ページに統合され、タスクとイベントの作成、関連レコード検索、バリデーション機能が実装されました。
+
+### Pull Request
+https://github.com/albatrosdx/salesforce-web-app/pull/7
