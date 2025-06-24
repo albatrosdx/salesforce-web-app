@@ -10,6 +10,7 @@ import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { Button } from '../ui/Button'
 import { Plus } from 'lucide-react'
 import { usePermissions } from '@/lib/permissions'
+import { DataTableFilters, FilterConfig, FilterValue } from '@/components/common/DataTableFilters'
 
 interface OpportunityListProps {
   className?: string
@@ -31,15 +32,52 @@ export function OpportunityList({ className = '' }: OpportunityListProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
+  const [activeFilters, setActiveFilters] = useState<FilterValue[]>([])
   const itemsPerPage = 20
 
-  const fetchOpportunities = async (search: string = '', page: number = 1) => {
+  const filterConfigs: FilterConfig[] = [
+    { field: 'Name', label: '商談名', type: 'text' },
+    { field: 'StageName', label: 'ステージ', type: 'select', options: [
+      { value: 'Prospecting', label: '見込み発掘' },
+      { value: 'Qualification', label: '検討段階' },
+      { value: 'Needs Analysis', label: 'ニーズ分析' },
+      { value: 'Value Proposition', label: '提案段階' },
+      { value: 'Id. Decision Makers', label: '決裁者特定' },
+      { value: 'Proposal/Price Quote', label: '見積提示' },
+      { value: 'Negotiation/Review', label: '交渉段階' },
+      { value: 'Closed Won', label: '受注' },
+      { value: 'Closed Lost', label: '失注' }
+    ]},
+    { field: 'Type', label: '種別', type: 'select', options: [
+      { value: 'Existing Customer - Upgrade', label: '既存顧客 - アップグレード' },
+      { value: 'Existing Customer - Replacement', label: '既存顧客 - 置換' },
+      { value: 'Existing Customer - Downgrade', label: '既存顧客 - ダウングレード' },
+      { value: 'New Customer', label: '新規顧客' }
+    ]},
+    { field: 'LeadSource', label: 'リードソース', type: 'select', options: [
+      { value: 'Web', label: 'Web' },
+      { value: 'Phone Inquiry', label: '電話問い合わせ' },
+      { value: 'Partner Referral', label: 'パートナー紹介' },
+      { value: 'Purchased List', label: '購入リスト' },
+      { value: 'Other', label: 'その他' }
+    ]},
+    { field: 'CloseDate', label: '完了予定日', type: 'date' }
+  ]
+
+  const fetchOpportunities = async (search: string = '', page: number = 1, filters: FilterValue[] = []) => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
         search,
         page: page.toString(),
         limit: itemsPerPage.toString()
+      })
+
+      // Add filter parameters
+      filters.forEach((filter, index) => {
+        params.append(`filter_${index}_field`, filter.field)
+        params.append(`filter_${index}_value`, filter.value)
+        params.append(`filter_${index}_operator`, filter.operator || 'equals')
       })
       
       const response = await fetch(`/api/salesforce/opportunities?${params}`)
@@ -59,11 +97,16 @@ export function OpportunityList({ className = '' }: OpportunityListProps) {
   }
 
   useEffect(() => {
-    fetchOpportunities(searchTerm, currentPage)
-  }, [searchTerm, currentPage])
+    fetchOpportunities(searchTerm, currentPage, activeFilters)
+  }, [searchTerm, currentPage, activeFilters])
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
+  const handleFiltersChange = (filters: FilterValue[]) => {
+    setActiveFilters(filters)
     setCurrentPage(1)
   }
 
@@ -137,12 +180,19 @@ export function OpportunityList({ className = '' }: OpportunityListProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">商談</h1>
-        {hasPermission('opportunities', 'create') && (
-          <Button onClick={() => router.push('/dashboard/opportunities/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            新規作成
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <DataTableFilters
+            filters={filterConfigs}
+            activeFilters={activeFilters}
+            onFiltersChange={handleFiltersChange}
+          />
+          {hasPermission('opportunities', 'create') && (
+            <Button onClick={() => router.push('/dashboard/opportunities/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              新規作成
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Search */}

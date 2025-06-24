@@ -7,8 +7,9 @@ import { SearchInput } from '../ui/SearchInput'
 import { Pagination } from '../ui/Pagination'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { Button } from '../ui/Button'
-import { Plus, Filter, Download, ChevronDown, Building2, MoreVertical } from 'lucide-react'
+import { Plus, Download, ChevronDown, Building2, MoreVertical } from 'lucide-react'
 import { usePermissions } from '@/lib/permissions'
+import { DataTableFilters, FilterConfig, FilterValue } from '@/components/common/DataTableFilters'
 
 interface AccountListProps {
   className?: string
@@ -30,15 +31,71 @@ export function AccountList({ className = '' }: AccountListProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
+  const [activeFilters, setActiveFilters] = useState<FilterValue[]>([])
   const itemsPerPage = 20
 
-  const fetchAccounts = async (search: string = '', page: number = 1) => {
+  const filterConfigs: FilterConfig[] = [
+    { field: 'Name', label: '取引先名', type: 'text' },
+    { field: 'Type', label: '種別', type: 'select', options: [
+      { value: 'Prospect', label: '見込み客' },
+      { value: 'Customer - Direct', label: '顧客 - 直接' },
+      { value: 'Customer - Channel', label: '顧客 - チャネル' },
+      { value: 'Channel Partner / Reseller', label: 'チャネルパートナー・販売代理店' },
+      { value: 'Installation Partner', label: '設置パートナー' },
+      { value: 'Technology Partner', label: '技術パートナー' },
+      { value: 'Other', label: 'その他' }
+    ]},
+    { field: 'Industry', label: '業界', type: 'select', options: [
+      { value: 'Agriculture', label: '農業' },
+      { value: 'Apparel', label: 'アパレル' },
+      { value: 'Banking', label: '銀行業' },
+      { value: 'Biotechnology', label: 'バイオテクノロジー' },
+      { value: 'Chemicals', label: '化学' },
+      { value: 'Communications', label: '通信' },
+      { value: 'Construction', label: '建設' },
+      { value: 'Consulting', label: 'コンサルティング' },
+      { value: 'Education', label: '教育' },
+      { value: 'Electronics', label: '電子機器' },
+      { value: 'Energy', label: 'エネルギー' },
+      { value: 'Engineering', label: 'エンジニアリング' },
+      { value: 'Entertainment', label: 'エンターテイメント' },
+      { value: 'Environmental', label: '環境' },
+      { value: 'Finance', label: '金融' },
+      { value: 'Food & Beverage', label: '飲食料品' },
+      { value: 'Government', label: '政府機関' },
+      { value: 'Healthcare', label: 'ヘルスケア' },
+      { value: 'Hospitality', label: '接客業' },
+      { value: 'Insurance', label: '保険' },
+      { value: 'Machinery', label: '機械' },
+      { value: 'Manufacturing', label: '製造業' },
+      { value: 'Media', label: 'メディア' },
+      { value: 'Not For Profit', label: '非営利団体' },
+      { value: 'Recreation', label: 'レクリエーション' },
+      { value: 'Retail', label: '小売' },
+      { value: 'Shipping', label: '運送' },
+      { value: 'Technology', label: 'テクノロジー' },
+      { value: 'Telecommunications', label: '電気通信' },
+      { value: 'Transportation', label: '輸送' },
+      { value: 'Utilities', label: '公益事業' },
+      { value: 'Other', label: 'その他' }
+    ]},
+    { field: 'Phone', label: '電話番号', type: 'text' }
+  ]
+
+  const fetchAccounts = async (search: string = '', page: number = 1, filters: FilterValue[] = []) => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
         search,
         page: page.toString(),
         limit: itemsPerPage.toString()
+      })
+
+      // Add filter parameters
+      filters.forEach((filter, index) => {
+        params.append(`filter_${index}_field`, filter.field)
+        params.append(`filter_${index}_value`, filter.value)
+        params.append(`filter_${index}_operator`, filter.operator || 'equals')
       })
       
       const response = await fetch(`/api/salesforce/accounts?${params}`)
@@ -58,11 +115,16 @@ export function AccountList({ className = '' }: AccountListProps) {
   }
 
   useEffect(() => {
-    fetchAccounts(searchTerm, currentPage)
-  }, [searchTerm, currentPage])
+    fetchAccounts(searchTerm, currentPage, activeFilters)
+  }, [searchTerm, currentPage, activeFilters])
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
+  const handleFiltersChange = (filters: FilterValue[]) => {
+    setActiveFilters(filters)
     setCurrentPage(1)
   }
 
@@ -95,19 +157,20 @@ export function AccountList({ className = '' }: AccountListProps) {
             </div>
           </div>
           <div className="list-actions">
-            <button className="btn btn-outline">
-              <Filter style={{ width: '16px', height: '16px' }} />
-              フィルター
-            </button>
-            <button className="btn btn-outline">
-              <Download style={{ width: '16px', height: '16px' }} />
+            <DataTableFilters
+              filters={filterConfigs}
+              activeFilters={activeFilters}
+              onFiltersChange={handleFiltersChange}
+            />
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
               エクスポート
-            </button>
+            </Button>
             {hasPermission('accounts', 'create') && (
-              <button className="btn btn-primary" onClick={() => router.push('/dashboard/accounts/new')}>
-                <Plus style={{ width: '16px', height: '16px' }} />
-                新規
-              </button>
+              <Button onClick={() => router.push('/dashboard/accounts/new')}>
+                <Plus className="h-4 w-4 mr-2" />
+                新規作成
+              </Button>
             )}
           </div>
         </div>
