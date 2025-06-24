@@ -10,6 +10,7 @@ import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { Button } from '../ui/Button'
 import { Plus, Mail, Phone } from 'lucide-react'
 import { usePermissions } from '@/lib/permissions'
+import { DataTableFilters, FilterConfig, FilterValue } from '@/components/common/DataTableFilters'
 
 interface ContactListProps {
   className?: string
@@ -31,15 +32,33 @@ export function ContactList({ className = '' }: ContactListProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
+  const [activeFilters, setActiveFilters] = useState<FilterValue[]>([])
   const itemsPerPage = 20
 
-  const fetchContacts = async (search: string = '', page: number = 1) => {
+  const filterConfigs: FilterConfig[] = [
+    { field: 'Name', label: '氏名', type: 'text' },
+    { field: 'FirstName', label: '名', type: 'text' },
+    { field: 'LastName', label: '姓', type: 'text' },
+    { field: 'Email', label: 'メール', type: 'text' },
+    { field: 'Phone', label: '電話番号', type: 'text' },
+    { field: 'Title', label: '役職', type: 'text' },
+    { field: 'Department', label: '部署', type: 'text' }
+  ]
+
+  const fetchContacts = async (search: string = '', page: number = 1, filters: FilterValue[] = []) => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
         search,
         page: page.toString(),
         limit: itemsPerPage.toString()
+      })
+
+      // Add filter parameters
+      filters.forEach((filter, index) => {
+        params.append(`filter_${index}_field`, filter.field)
+        params.append(`filter_${index}_value`, filter.value)
+        params.append(`filter_${index}_operator`, filter.operator || 'equals')
       })
       
       const response = await fetch(`/api/salesforce/contacts?${params}`)
@@ -59,11 +78,16 @@ export function ContactList({ className = '' }: ContactListProps) {
   }
 
   useEffect(() => {
-    fetchContacts(searchTerm, currentPage)
-  }, [searchTerm, currentPage])
+    fetchContacts(searchTerm, currentPage, activeFilters)
+  }, [searchTerm, currentPage, activeFilters])
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
+  const handleFiltersChange = (filters: FilterValue[]) => {
+    setActiveFilters(filters)
     setCurrentPage(1)
   }
 
@@ -88,12 +112,19 @@ export function ContactList({ className = '' }: ContactListProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">取引先責任者</h1>
-        {hasPermission('contacts', 'create') && (
-          <Button onClick={() => router.push('/dashboard/contacts/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            新規作成
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <DataTableFilters
+            filters={filterConfigs}
+            activeFilters={activeFilters}
+            onFiltersChange={handleFiltersChange}
+          />
+          {hasPermission('contacts', 'create') && (
+            <Button onClick={() => router.push('/dashboard/contacts/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              新規作成
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Search */}
