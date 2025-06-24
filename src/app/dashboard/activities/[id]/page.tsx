@@ -2,24 +2,67 @@ import { Card, CardContent } from '@/components'
 import { Task, Event } from '@/types/salesforce'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/config'
 
 type Activity = (Task | Event) & { activityType: 'Task' | 'Event' }
 
 async function getActivity(id: string): Promise<Activity | null> {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/salesforce/activities/${id}`,
-      { cache: 'no-store' }
-    )
+    const session = await getServerSession(authOptions)
     
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null
-      }
-      throw new Error('Failed to fetch activity')
+    if (!session?.accessToken || !session?.instanceUrl) {
+      return null
     }
     
-    return response.json()
+    // まずTaskとして取得を試みる
+    const taskFields = [
+      'Id', 'Subject', 'Status', 'Priority', 'ActivityDate', 'Description',
+      'WhatId', 'What.Name', 'What.Type', 'WhoId', 'Who.Name', 'Who.Type',
+      'OwnerId', 'Owner.Name', 'IsHighPriority', 'IsClosed',
+      'CreatedDate', 'LastModifiedDate'
+    ].join(',')
+    
+    let response = await fetch(
+      `${session.instanceUrl}/services/data/v58.0/sobjects/Task/${id}?fields=${taskFields}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (response.ok) {
+      const task = await response.json()
+      return { ...task, activityType: 'Task' as const }
+    }
+
+    // TaskでなければEventとして取得を試みる
+    const eventFields = [
+      'Id', 'Subject', 'Location', 'Description', 'ActivityDate', 'ActivityDateTime',
+      'StartDateTime', 'EndDateTime', 'DurationInMinutes',
+      'WhatId', 'What.Name', 'What.Type', 'WhoId', 'Who.Name', 'Who.Type',
+      'OwnerId', 'Owner.Name', 'IsAllDayEvent',
+      'CreatedDate', 'LastModifiedDate'
+    ].join(',')
+    
+    response = await fetch(
+      `${session.instanceUrl}/services/data/v58.0/sobjects/Event/${id}?fields=${eventFields}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (response.ok) {
+      const event = await response.json()
+      return { ...event, activityType: 'Event' as const }
+    }
+    
+    return null
   } catch (error) {
     console.error('Error fetching activity:', error)
     return null

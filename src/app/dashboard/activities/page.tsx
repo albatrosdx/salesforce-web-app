@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { Card, CardContent, Button } from '@/components'
 import { Task, Event } from '@/types/salesforce'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
-import { SalesforceClient } from '@/lib/salesforce/client'
 
 type Activity = (Task | Event) & { activityType: 'Task' | 'Event' }
 
@@ -17,56 +16,77 @@ async function getActivities(): Promise<ActivitiesResponse> {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user || !session.accessToken) {
-      console.error('No session or access token available')
+    if (!session?.accessToken || !session?.instanceUrl) {
       return { records: [], totalSize: 0, done: true }
     }
 
-    const client = new SalesforceClient(
-      session.instanceUrl,
-      session.accessToken
-    )
-
-    const tasksPromise = client.query<Task & { activityType: 'Task' }>(`
+    const limit = '50'
+    
+    // タスクを取得
+    const taskSoql = `
       SELECT Id, Subject, Status, Priority, ActivityDate, Description,
              WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
              OwnerId, Owner.Name, IsHighPriority, IsClosed,
-             CreatedDate, LastModifiedDate, 'Task' as activityType
+             CreatedDate, LastModifiedDate
       FROM Task
+      WHERE IsDeleted = false
       ORDER BY ActivityDate DESC, CreatedDate DESC
-      LIMIT 25
-    `)
+      LIMIT ${limit}
+    `
     
-    const eventsPromise = client.query<Event & { activityType: 'Event' }>(`
-      SELECT Id, Subject, StartDateTime, EndDateTime, Description,
+    // イベントを取得
+    const eventSoql = `
+      SELECT Id, Subject, Location, Description, ActivityDate, ActivityDateTime,
+             StartDateTime, EndDateTime, DurationInMinutes,
              WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
              OwnerId, Owner.Name, IsAllDayEvent,
-             CreatedDate, LastModifiedDate, 'Event' as activityType
+             CreatedDate, LastModifiedDate
       FROM Event
-      ORDER BY StartDateTime DESC, CreatedDate DESC
-      LIMIT 25
-    `)
-
-    const [tasksResult, eventsResult] = await Promise.all([tasksPromise, eventsPromise])
+      WHERE IsDeleted = false
+      ORDER BY ActivityDateTime DESC, CreatedDate DESC
+      LIMIT ${limit}
+    `
     
-    const activities: Activity[] = [
-      ...tasksResult.records,
-      ...eventsResult.records
-    ].sort((a, b) => {
-      const aDate = a.activityType === 'Task' 
-        ? (a as Task).ActivityDate || (a as Task).CreatedDate
-        : (a as Event).StartDateTime || (a as Event).CreatedDate
-      const bDate = b.activityType === 'Task'
-        ? (b as Task).ActivityDate || (b as Task).CreatedDate
-        : (b as Event).StartDateTime || (b as Event).CreatedDate
-      
-      return new Date(bDate).getTime() - new Date(aDate).getTime()
-    })
+    const [tasksResponse, eventsResponse] = await Promise.all([
+      fetch(`${session.instanceUrl}/services/data/v58.0/query/?q=${encodeURIComponent(taskSoql)}`, {
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }),
+      fetch(`${session.instanceUrl}/services/data/v58.0/query/?q=${encodeURIComponent(eventSoql)}`, {
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      })
+    ])
 
+    if (!tasksResponse.ok || !eventsResponse.ok) {
+      console.error('Salesforce API error:', {
+        tasks: !tasksResponse.ok ? await tasksResponse.text() : 'OK',
+        events: !eventsResponse.ok ? await eventsResponse.text() : 'OK'
+      })
+      return { records: [], totalSize: 0, done: true }
+    }
+
+    const tasks = await tasksResponse.json()
+    const events = await eventsResponse.json()
+    
+    // タスクとイベントを統合して返す
+    const activities = [
+      ...tasks.records.map((task: any) => ({ ...task, activityType: 'Task' as const })),
+      ...events.records.map((event: any) => ({ ...event, activityType: 'Event' as const }))
+    ].sort((a, b) => {
+      const dateA = new Date(a.ActivityDate || a.ActivityDateTime || a.CreatedDate)
+      const dateB = new Date(b.ActivityDate || b.ActivityDateTime || b.CreatedDate)
+      return dateB.getTime() - dateA.getTime()
+    })
+    
     return {
       records: activities,
-      totalSize: tasksResult.totalSize + eventsResult.totalSize,
-      done: tasksResult.done && eventsResult.done
+      totalSize: tasks.totalSize + events.totalSize,
+      done: tasks.done && events.done
     }
   } catch (error) {
     console.error('Error fetching activities:', error)

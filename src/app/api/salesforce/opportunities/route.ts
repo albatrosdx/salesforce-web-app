@@ -33,3 +33,23 @@ export async function GET(request: NextRequest) {
     return handleSalesforceError(error)
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const client = await createSalesforceClient()
+    
+    if (!client) {
+      return createApiError('Unauthorized', 401)
+    }
+
+    const body = await request.json()
+    
+    // Salesforceへの作成リクエスト
+    const result = await client.createOpportunity(body)
+    
+    return createApiResponse(result)
+  } catch (error: any) {
+    console.error('Opportunity creation error:', error)
+    return handleSalesforceError(error)
+  }
+}

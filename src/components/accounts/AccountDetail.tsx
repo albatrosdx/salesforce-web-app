@@ -156,7 +156,8 @@ export function AccountDetail({
                         <dt className="text-sm font-medium text-gray-500">ウェブサイト</dt>
                         <dd className="text-sm text-gray-900">
                           <a href={account.Website.startsWith('http') ? account.Website : `https://${account.Website}`} 
-                             target="_blank" rel="noopener noreferrer" 
+                             target="_blank" 
+                             rel="noopener noreferrer" 
                              className="text-salesforce-blue hover:text-salesforce-darkblue">
                             {account.Website}
                           </a>
