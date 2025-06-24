@@ -28,20 +28,14 @@ export function DashboardHome() {
     const fetchStats = async () => {
       try {
         setLoading(true)
-        // ここでは簡単な統計データを模擬的に作成
-        // 実際のAPIがあれば、それを呼び出します
-        await new Promise(resolve => setTimeout(resolve, 1000)) // 模擬的な遅延
+        const response = await fetch('/api/salesforce/dashboard/stats')
         
-        setStats({
-          accounts: 42,
-          contacts: 156,
-          opportunities: 28,
-          activities: 89,
-          totalRevenue: 2450000,
-          closedWonOpportunities: 12,
-          newAccountsThisMonth: 8,
-          upcomingActivities: 15
-        })
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard statistics')
+        }
+        
+        const data = await response.json()
+        setStats(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
