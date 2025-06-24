@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { Card, CardContent, Button } from '@/components'
 import { Task, Event } from '@/types/salesforce'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth/config'
+import { SalesforceClient } from '@/lib/salesforce/client'
 
 type Activity = (Task | Event) & { activityType: 'Task' | 'Event' }
 
@@ -12,16 +15,59 @@ interface ActivitiesResponse {
 
 async function getActivities(): Promise<ActivitiesResponse> {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/salesforce/activities/list?limit=50`,
-      { cache: 'no-store' }
-    )
+    const session = await getServerSession(authOptions)
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch activities')
+    if (!session?.user || !session.accessToken) {
+      console.error('No session or access token available')
+      return { records: [], totalSize: 0, done: true }
     }
+
+    const client = new SalesforceClient(
+      session.instanceUrl,
+      session.accessToken
+    )
+
+    const tasksPromise = client.query<Task & { activityType: 'Task' }>(`
+      SELECT Id, Subject, Status, Priority, ActivityDate, Description,
+             WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
+             OwnerId, Owner.Name, IsHighPriority, IsClosed,
+             CreatedDate, LastModifiedDate, 'Task' as activityType
+      FROM Task
+      ORDER BY ActivityDate DESC, CreatedDate DESC
+      LIMIT 25
+    `)
     
-    return response.json()
+    const eventsPromise = client.query<Event & { activityType: 'Event' }>(`
+      SELECT Id, Subject, StartDateTime, EndDateTime, Description,
+             WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
+             OwnerId, Owner.Name, IsAllDayEvent,
+             CreatedDate, LastModifiedDate, 'Event' as activityType
+      FROM Event
+      ORDER BY StartDateTime DESC, CreatedDate DESC
+      LIMIT 25
+    `)
+
+    const [tasksResult, eventsResult] = await Promise.all([tasksPromise, eventsPromise])
+    
+    const activities: Activity[] = [
+      ...tasksResult.records,
+      ...eventsResult.records
+    ].sort((a, b) => {
+      const aDate = a.activityType === 'Task' 
+        ? (a as Task).ActivityDate || (a as Task).CreatedDate
+        : (a as Event).StartDateTime || (a as Event).CreatedDate
+      const bDate = b.activityType === 'Task'
+        ? (b as Task).ActivityDate || (b as Task).CreatedDate
+        : (b as Event).StartDateTime || (b as Event).CreatedDate
+      
+      return new Date(bDate).getTime() - new Date(aDate).getTime()
+    })
+
+    return {
+      records: activities,
+      totalSize: tasksResult.totalSize + eventsResult.totalSize,
+      done: tasksResult.done && eventsResult.done
+    }
   } catch (error) {
     console.error('Error fetching activities:', error)
     return { records: [], totalSize: 0, done: true }

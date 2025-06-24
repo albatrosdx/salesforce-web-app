@@ -1,23 +1,33 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
-import { AccountDetail } from '@/components/accounts'
+import { AccountDetail, AccountEditForm } from '@/components/accounts'
 import { useAccount, useContactsByAccount, useOpportunitiesByAccount } from '@/lib/salesforce/api-hooks'
 
 export default function AccountDetailPage() {
   const params = useParams()
   const router = useRouter()
   const accountId = params.id as string
+  const [isEditing, setIsEditing] = useState(false)
 
-  const { data: account, isLoading: accountLoading, error: accountError } = useAccount(accountId)
+  const { data: account, isLoading: accountLoading, error: accountError, refetch } = useAccount(accountId)
   const { data: contactsData, isLoading: contactsLoading } = useContactsByAccount(accountId)
   const { data: opportunitiesData, isLoading: opportunitiesLoading } = useOpportunitiesByAccount(accountId)
 
   const handleEdit = () => {
-    // TODO: Implement account editing
-    console.log('Edit account:', accountId)
+    setIsEditing(true)
+  }
+
+  const handleEditCancel = () => {
+    setIsEditing(false)
+  }
+
+  const handleEditSuccess = () => {
+    setIsEditing(false)
+    refetch()
   }
 
   const handleDelete = () => {
@@ -131,14 +141,22 @@ export default function AccountDetailPage() {
 
       {/* 取引先詳細 */}
       {account && (
-        <AccountDetail
-          account={account}
-          contacts={contactsData?.records || []}
-          opportunities={opportunitiesData?.records || []}
-          loading={accountLoading || contactsLoading || opportunitiesLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        isEditing ? (
+          <AccountEditForm
+            account={account}
+            onCancel={handleEditCancel}
+            onSuccess={handleEditSuccess}
+          />
+        ) : (
+          <AccountDetail
+            account={account}
+            contacts={contactsData?.records || []}
+            opportunities={opportunitiesData?.records || []}
+            loading={accountLoading || contactsLoading || opportunitiesLoading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )
       )}
     </div>
   )
