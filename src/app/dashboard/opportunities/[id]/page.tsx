@@ -1,21 +1,32 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
-import { OpportunityDetail } from '@/components/opportunities'
+import { OpportunityDetail, OpportunityEditForm } from '@/components/opportunities'
 import { useOpportunity } from '@/lib/salesforce/api-hooks'
 
 export default function OpportunityDetailPage() {
   const params = useParams()
   const router = useRouter()
   const opportunityId = params.id as string
+  const [isEditing, setIsEditing] = useState(false)
 
   const { data: opportunity, isLoading: opportunityLoading, error: opportunityError } = useOpportunity(opportunityId)
 
   const handleEdit = () => {
-    // TODO: Implement opportunity editing
-    console.log('Edit opportunity:', opportunityId)
+    setIsEditing(true)
+  }
+
+  const handleEditCancel = () => {
+    setIsEditing(false)
+  }
+
+  const handleEditSuccess = () => {
+    setIsEditing(false)
+    // Refresh the page to reload data
+    window.location.reload()
   }
 
   const handleDelete = () => {
@@ -129,12 +140,20 @@ export default function OpportunityDetailPage() {
 
       {/* 商談詳細 */}
       {opportunity && (
-        <OpportunityDetail
-          opportunity={opportunity}
-          loading={opportunityLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        isEditing ? (
+          <OpportunityEditForm
+            opportunity={opportunity}
+            onCancel={handleEditCancel}
+            onSuccess={handleEditSuccess}
+          />
+        ) : (
+          <OpportunityDetail
+            opportunity={opportunity}
+            loading={opportunityLoading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )
       )}
     </div>
   )
