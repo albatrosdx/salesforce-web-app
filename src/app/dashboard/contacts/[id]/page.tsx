@@ -1,21 +1,32 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
-import { ContactDetail } from '@/components/contacts'
+import { ContactDetail, ContactEditForm } from '@/components/contacts'
 import { useContact } from '@/lib/salesforce/api-hooks'
 
 export default function ContactDetailPage() {
   const params = useParams()
   const router = useRouter()
   const contactId = params.id as string
+  const [isEditing, setIsEditing] = useState(false)
 
   const { data: contact, isLoading: contactLoading, error: contactError } = useContact(contactId)
 
   const handleEdit = () => {
-    // TODO: Implement contact editing
-    console.log('Edit contact:', contactId)
+    setIsEditing(true)
+  }
+
+  const handleEditCancel = () => {
+    setIsEditing(false)
+  }
+
+  const handleEditSuccess = () => {
+    setIsEditing(false)
+    // Refresh the page to reload data
+    window.location.reload()
   }
 
   const handleDelete = () => {
@@ -129,12 +140,20 @@ export default function ContactDetailPage() {
 
       {/* 取引先責任者詳細 */}
       {contact && (
-        <ContactDetail
-          contact={contact}
-          loading={contactLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        isEditing ? (
+          <ContactEditForm
+            contact={contact}
+            onCancel={handleEditCancel}
+            onSuccess={handleEditSuccess}
+          />
+        ) : (
+          <ContactDetail
+            contact={contact}
+            loading={contactLoading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )
       )}
     </div>
   )
