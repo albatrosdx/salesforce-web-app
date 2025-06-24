@@ -47,8 +47,8 @@ export function OpportunityEditForm({ opportunity, onCancel, onSuccess }: Opport
           CloseDate: formData.CloseDate,
           Amount: formData.Amount ? parseFloat(formData.Amount) : null,
           Probability: formData.Probability ? parseFloat(formData.Probability) : null,
-          Type: formData.Type || null,
-          LeadSource: formData.LeadSource || null,
+          Type: formData.Type === '__NONE__' ? null : formData.Type || null,
+          LeadSource: formData.LeadSource === '__NONE__' ? null : formData.LeadSource || null,
           Description: formData.Description || null
         }),
       })
@@ -166,7 +166,7 @@ export function OpportunityEditForm({ opportunity, onCancel, onSuccess }: Opport
                     <SelectValue placeholder="種別を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">未選択</SelectItem>
+                    <SelectItem value="__NONE__">未選択</SelectItem>
                     <SelectItem value="Existing Customer - Upgrade">既存顧客 - アップグレード</SelectItem>
                     <SelectItem value="Existing Customer - Replacement">既存顧客 - 置換</SelectItem>
                     <SelectItem value="Existing Customer - Downgrade">既存顧客 - ダウングレード</SelectItem>
@@ -181,7 +181,7 @@ export function OpportunityEditForm({ opportunity, onCancel, onSuccess }: Opport
                     <SelectValue placeholder="リードソースを選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">未選択</SelectItem>
+                    <SelectItem value="__NONE__">未選択</SelectItem>
                     <SelectItem value="Web">Web</SelectItem>
                     <SelectItem value="Phone Inquiry">電話問い合わせ</SelectItem>
                     <SelectItem value="Partner Referral">パートナー紹介</SelectItem>
