@@ -29,12 +29,24 @@ export default function ContactDetailPage() {
     window.location.reload()
   }
 
-  const handleDelete = () => {
-    // TODO: Implement contact deletion
+  const handleDelete = async () => {
     if (confirm('この取引先責任者を削除してもよろしいですか？')) {
-      console.log('Delete contact:', contactId)
-      // After deletion, redirect to contacts list
-      // router.push('/dashboard/contacts')
+      try {
+        const response = await fetch(`/api/salesforce/contacts/${contactId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`削除に失敗しました: ${errorText}`)
+        }
+
+        // 削除成功後、取引先責任者一覧に遷移
+        router.push('/dashboard/contacts')
+      } catch (error) {
+        console.error('Contact deletion error:', error)
+        alert(error instanceof Error ? error.message : '削除中にエラーが発生しました')
+      }
     }
   }
 

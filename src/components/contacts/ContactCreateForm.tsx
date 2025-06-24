@@ -261,7 +261,7 @@ export function ContactCreateForm({ accountId }: ContactCreateFormProps) {
             >
               キャンセル
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-salesforce-blue hover:bg-salesforce-darkblue">
               {isSubmitting ? '作成中...' : '作成'}
             </Button>
           </div>
