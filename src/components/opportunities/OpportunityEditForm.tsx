@@ -22,8 +22,8 @@ export function OpportunityEditForm({ opportunity, onCancel, onSuccess }: Opport
     CloseDate: opportunity.CloseDate || '',
     Amount: opportunity.Amount?.toString() || '',
     Probability: opportunity.Probability?.toString() || '',
-    Type: opportunity.Type || '',
-    LeadSource: opportunity.LeadSource || '',
+    Type: opportunity.Type || '__NONE__',
+    LeadSource: opportunity.LeadSource || '__NONE__',
     Description: opportunity.Description || ''
   })
 
@@ -45,8 +45,8 @@ export function OpportunityEditForm({ opportunity, onCancel, onSuccess }: Opport
           Name: formData.Name,
           StageName: formData.StageName,
           CloseDate: formData.CloseDate,
-          Amount: formData.Amount ? parseFloat(formData.Amount) : null,
-          Probability: formData.Probability ? parseFloat(formData.Probability) : null,
+          Amount: formData.Amount ? (isNaN(parseFloat(formData.Amount)) ? null : parseFloat(formData.Amount)) : null,
+          Probability: formData.Probability ? (isNaN(parseFloat(formData.Probability)) ? null : parseFloat(formData.Probability)) : null,
           Type: formData.Type === '__NONE__' ? null : formData.Type || null,
           LeadSource: formData.LeadSource === '__NONE__' ? null : formData.LeadSource || null,
           Description: formData.Description || null
@@ -54,8 +54,15 @@ export function OpportunityEditForm({ opportunity, onCancel, onSuccess }: Opport
       })
 
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`更新に失敗しました: ${errorText}`)
+        let errorMessage = '更新に失敗しました'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch {
+          const errorText = await response.text()
+          errorMessage = errorText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
 
       const updatedOpportunity = await response.json()

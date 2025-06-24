@@ -16,12 +16,13 @@ import {
 function useApiData<T>(
   url: string | null,
   dependencies: any[] = []
-): LoadingState & { data: T | null } {
+): LoadingState & { data: T | null; refetch: () => void } {
   const [state, setState] = useState<LoadingState & { data: T | null }>({
     isLoading: true,
     error: null,
     data: null
   })
+  const [refetchTrigger, setRefetchTrigger] = useState(0)
 
   useEffect(() => {
     if (!url) {
@@ -72,9 +73,13 @@ function useApiData<T>(
     return () => {
       isCancelled = true
     }
-  }, [url, ...dependencies])
+  }, [url, refetchTrigger, ...dependencies])
 
-  return state
+  const refetch = () => {
+    setRefetchTrigger(prev => prev + 1)
+  }
+
+  return { ...state, refetch }
 }
 
 // Account関連フック
