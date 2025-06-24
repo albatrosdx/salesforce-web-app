@@ -13,7 +13,7 @@ export default function AccountDetailPage() {
   const accountId = params.id as string
   const [isEditing, setIsEditing] = useState(false)
 
-  const { data: account, isLoading: accountLoading, error: accountError, refetch } = useAccount(accountId)
+  const { data: account, isLoading: accountLoading, error: accountError } = useAccount(accountId)
   const { data: contactsData, isLoading: contactsLoading } = useContactsByAccount(accountId)
   const { data: opportunitiesData, isLoading: opportunitiesLoading } = useOpportunitiesByAccount(accountId)
 
@@ -27,7 +27,8 @@ export default function AccountDetailPage() {
 
   const handleEditSuccess = () => {
     setIsEditing(false)
-    refetch()
+    // Refresh the page to reload data
+    window.location.reload()
   }
 
   const handleDelete = () => {

@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Account } from '@/types'
 import { Card, CardContent, CardHeader, Button } from '@/components/ui'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { TextArea } from '@/components/ui'
+import { Input, TextArea } from '@/components/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/radix-select'
 
 interface AccountEditFormProps {
