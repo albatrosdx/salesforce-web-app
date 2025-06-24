@@ -181,6 +181,10 @@ export class SalesforceClient {
     return this.query<Contact>(soql)
   }
 
+  async createContact(data: Partial<Contact>): Promise<{ id: string; success: boolean }> {
+    return this.createRecord('Contact', data)
+  }
+
   // Opportunity関連メソッド
   async getOpportunities(limit = 50, offset = 0): Promise<SalesforceQueryResponse<Opportunity>> {
     const soql = `
@@ -229,6 +233,10 @@ export class SalesforceClient {
       LIMIT ${limit} OFFSET ${offset}
     `
     return this.query<Opportunity>(soql)
+  }
+
+  async createOpportunity(data: Partial<Opportunity>): Promise<{ id: string; success: boolean }> {
+    return this.createRecord('Opportunity', data)
   }
 
   // Activity関連メソッド（Task & Event）

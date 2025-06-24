@@ -24,7 +24,7 @@ export async function GET(
       SELECT Id, Subject, Status, Priority, ActivityDate, Description,
              WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
              OwnerId, Owner.Name, IsHighPriority, IsClosed,
-             CreatedDate, LastModifiedDate, Type
+             CreatedDate, LastModifiedDate
       FROM Task
       WHERE WhatId = '${id}'
       ORDER BY ActivityDate DESC, CreatedDate DESC
