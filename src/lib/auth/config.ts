@@ -162,12 +162,14 @@ export const authOptions: NextAuthOptions = (() => {
   callbacks: {
     async jwt({ token, account, profile }) {
       try {
+        // 初回ログイン時
         if (account && profile) {
           token.accessToken = account.access_token || ''
           token.refreshToken = account.refresh_token || ''
           token.instanceUrl = (account.instance_url as string) || ''
           token.userId = (profile as Record<string, unknown>).user_id as string || ''
           token.organizationId = (profile as Record<string, unknown>).organization_id as string || ''
+          token.expiresAt = account.expires_at ? account.expires_at * 1000 : Date.now() + 60 * 60 * 1000
           
           // Debug logging in development
           if (process.env.NODE_ENV === 'development') {
@@ -175,14 +177,59 @@ export const authOptions: NextAuthOptions = (() => {
             console.log('JWT callback - profile:', profile)
           }
         }
-        return token
+        
+        // トークンの有効期限をチェック
+        if (Date.now() < (token.expiresAt as number)) {
+          return token
+        }
+        
+        // リフレッシュトークンを使用してアクセストークンを更新
+        if (!token.refreshToken) {
+          throw new Error('No refresh token available')
+        }
+        
+        const response = await fetch(getSalesforceUrl('/services/oauth2/token'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: token.refreshToken as string,
+            client_id: env.SALESFORCE_CLIENT_ID!,
+            client_secret: env.SALESFORCE_CLIENT_SECRET!,
+          }),
+        })
+        
+        if (!response.ok) {
+          const error = await response.text()
+          console.error('Failed to refresh token:', error)
+          throw new Error('Token refresh failed')
+        }
+        
+        const refreshedTokens = await response.json()
+        
+        return {
+          ...token,
+          accessToken: refreshedTokens.access_token,
+          expiresAt: Date.now() + 60 * 60 * 1000, // 1時間後
+        }
       } catch (error) {
         console.error('JWT callback error:', error)
-        return token
+        // リフレッシュに失敗した場合はトークンをクリア
+        return {
+          ...token,
+          error: 'RefreshAccessTokenError',
+        }
       }
     },
     async session({ session, token }) {
       try {
+        // トークンエラーがある場合はnullを返してサインアウト
+        if (token.error === 'RefreshAccessTokenError') {
+          return null as any
+        }
+        
         session.accessToken = token.accessToken as string
         session.refreshToken = token.refreshToken as string
         session.instanceUrl = token.instanceUrl as string
@@ -270,5 +317,7 @@ declare module 'next-auth/jwt' {
     instanceUrl: string
     userId: string
     organizationId: string
+    expiresAt?: number
+    error?: string
   }
 }

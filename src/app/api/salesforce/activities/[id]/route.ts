@@ -12,7 +12,11 @@ export async function GET(
     
     if (!session?.accessToken || !session?.instanceUrl) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { 
+          error: 'Session Expired', 
+          message: 'Salesforceセッションが期限切れです。再度ログインしてください。',
+          code: 'SESSION_EXPIRED'
+        },
         { status: 401 }
       )
     }
@@ -84,7 +88,11 @@ export async function PATCH(
     
     if (!session?.accessToken || !session?.instanceUrl) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { 
+          error: 'Session Expired', 
+          message: 'Salesforceセッションが期限切れです。再度ログインしてください。',
+          code: 'SESSION_EXPIRED'
+        },
         { status: 401 }
       )
     }
@@ -129,7 +137,11 @@ export async function DELETE(
     
     if (!session?.accessToken || !session?.instanceUrl) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { 
+          error: 'Session Expired', 
+          message: 'Salesforceセッションが期限切れです。再度ログインしてください。',
+          code: 'SESSION_EXPIRED'
+        },
         { status: 401 }
       )
     }
