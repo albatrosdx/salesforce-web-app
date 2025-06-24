@@ -155,7 +155,9 @@ export function AccountDetail({
                       <div>
                         <dt className="text-sm font-medium text-gray-500">ウェブサイト</dt>
                         <dd className="text-sm text-gray-900">
-                          <a href={account.Website} target="_blank" rel="noopener noreferrer" 
+                          <a href={account.Website.startsWith('http') ? account.Website : `https://${account.Website}`} 
+                             target="_blank" 
+                             rel="noopener noreferrer" 
                              className="text-salesforce-blue hover:text-salesforce-darkblue">
                             {account.Website}
                           </a>
@@ -218,11 +220,13 @@ export function AccountDetail({
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900">取引先責任者</h3>
-                  <Button>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    新規作成
+                  <Button asChild>
+                    <Link href={`/dashboard/contacts/new?accountId=${account.Id}`}>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      新規作成
+                    </Link>
                   </Button>
                 </div>
 
@@ -267,11 +271,13 @@ export function AccountDetail({
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900">商談</h3>
-                  <Button>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    新規作成
+                  <Button asChild>
+                    <Link href={`/dashboard/opportunities/new?accountId=${account.Id}`}>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      新規作成
+                    </Link>
                   </Button>
                 </div>
 
