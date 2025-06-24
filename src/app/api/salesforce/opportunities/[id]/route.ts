@@ -91,7 +91,31 @@ export async function PATCH(
       )
     }
 
-    return NextResponse.json({ success: true })
+    // Fetch and return the updated opportunity
+    const fields = [
+      'Id', 'Name', 'AccountId', 'Account.Name', 'StageName', 'Amount',
+      'Probability', 'CloseDate', 'Type', 'NextStep', 'LeadSource',
+      'IsClosed', 'IsWon', 'ForecastCategory', 'ForecastCategoryName',
+      'Description', 'HasOpportunityLineItem',
+      'CreatedDate', 'LastModifiedDate', 'CreatedById', 'LastModifiedById'
+    ].join(',')
+    
+    const getUrl = `${session.instanceUrl}/services/data/v58.0/sobjects/Opportunity/${id}?fields=${fields}`
+    
+    const getResponse = await fetch(getUrl, {
+      headers: {
+        'Authorization': `Bearer ${session.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!getResponse.ok) {
+      console.error('Failed to fetch updated opportunity')
+      return NextResponse.json({ success: true })
+    }
+
+    const updatedOpportunity = await getResponse.json()
+    return NextResponse.json(updatedOpportunity)
   } catch (error) {
     return handleApiError(error)
   }

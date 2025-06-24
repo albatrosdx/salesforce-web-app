@@ -129,6 +129,10 @@ export class SalesforceClient {
     return this.query<Account>(soql)
   }
 
+  async createAccount(data: Partial<Account>): Promise<{ id: string; success: boolean }> {
+    return this.createRecord('Account', data)
+  }
+
   // Contact関連メソッド
   async getContacts(limit = 50, offset = 0): Promise<SalesforceQueryResponse<Contact>> {
     const soql = `

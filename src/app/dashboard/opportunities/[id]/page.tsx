@@ -13,7 +13,7 @@ export default function OpportunityDetailPage() {
   const opportunityId = params.id as string
   const [isEditing, setIsEditing] = useState(false)
 
-  const { data: opportunity, isLoading: opportunityLoading, error: opportunityError } = useOpportunity(opportunityId)
+  const { data: opportunity, isLoading: opportunityLoading, error: opportunityError, refetch } = useOpportunity(opportunityId)
 
   const handleEdit = () => {
     setIsEditing(true)
@@ -25,8 +25,8 @@ export default function OpportunityDetailPage() {
 
   const handleEditSuccess = () => {
     setIsEditing(false)
-    // Refresh the page to reload data
-    window.location.reload()
+    // Trigger data refetch
+    refetch()
   }
 
   const handleDelete = async () => {
