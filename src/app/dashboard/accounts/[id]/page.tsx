@@ -31,12 +31,24 @@ export default function AccountDetailPage() {
     window.location.reload()
   }
 
-  const handleDelete = () => {
-    // TODO: Implement account deletion
+  const handleDelete = async () => {
     if (confirm('この取引先を削除してもよろしいですか？')) {
-      console.log('Delete account:', accountId)
-      // After deletion, redirect to accounts list
-      // router.push('/dashboard/accounts')
+      try {
+        const response = await fetch(`/api/salesforce/accounts/${accountId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`削除に失敗しました: ${errorText}`)
+        }
+
+        // 削除成功後、取引先一覧に遷移
+        router.push('/dashboard/accounts')
+      } catch (error) {
+        console.error('Account deletion error:', error)
+        alert(error instanceof Error ? error.message : '削除中にエラーが発生しました')
+      }
     }
   }
 

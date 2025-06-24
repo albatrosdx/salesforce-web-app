@@ -29,12 +29,24 @@ export default function OpportunityDetailPage() {
     window.location.reload()
   }
 
-  const handleDelete = () => {
-    // TODO: Implement opportunity deletion
+  const handleDelete = async () => {
     if (confirm('この商談を削除してもよろしいですか？')) {
-      console.log('Delete opportunity:', opportunityId)
-      // After deletion, redirect to opportunities list
-      // router.push('/dashboard/opportunities')
+      try {
+        const response = await fetch(`/api/salesforce/opportunities/${opportunityId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`削除に失敗しました: ${errorText}`)
+        }
+
+        // 削除成功後、商談一覧に遷移
+        router.push('/dashboard/opportunities')
+      } catch (error) {
+        console.error('Opportunity deletion error:', error)
+        alert(error instanceof Error ? error.message : '削除中にエラーが発生しました')
+      }
     }
   }
 

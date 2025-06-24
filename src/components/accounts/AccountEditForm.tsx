@@ -49,8 +49,8 @@ export function AccountEditForm({ account, onCancel, onSuccess }: AccountEditFor
         },
         body: JSON.stringify({
           Name: formData.Name,
-          Type: formData.Type || null,
-          Industry: formData.Industry || null,
+          Type: formData.Type === '__NONE__' ? null : formData.Type || null,
+          Industry: formData.Industry === '__NONE__' ? null : formData.Industry || null,
           Phone: formData.Phone || null,
           Website: formData.Website || null,
           NumberOfEmployees: formData.NumberOfEmployees ? parseInt(formData.NumberOfEmployees) : null,
@@ -123,7 +123,7 @@ export function AccountEditForm({ account, onCancel, onSuccess }: AccountEditFor
                     <SelectValue placeholder="種別を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">未選択</SelectItem>
+                    <SelectItem value="__NONE__">未選択</SelectItem>
                     <SelectItem value="Prospect">見込み客</SelectItem>
                     <SelectItem value="Customer - Direct">直接顧客</SelectItem>
                     <SelectItem value="Customer - Channel">チャネル顧客</SelectItem>
@@ -141,7 +141,7 @@ export function AccountEditForm({ account, onCancel, onSuccess }: AccountEditFor
                     <SelectValue placeholder="業界を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">未選択</SelectItem>
+                    <SelectItem value="__NONE__">未選択</SelectItem>
                     <SelectItem value="Agriculture">農業</SelectItem>
                     <SelectItem value="Apparel">アパレル</SelectItem>
                     <SelectItem value="Banking">銀行</SelectItem>
