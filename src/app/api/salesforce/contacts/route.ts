@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createSalesforceClient, createApiResponse, createApiError } from '@/lib/api/salesforce'
+import { handleSalesforceError } from '@/lib/api/middleware'
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,8 +28,8 @@ export async function GET(request: NextRequest) {
     }
     
     return createApiResponse(contacts)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Contacts API error:', error)
-    return createApiError('Failed to fetch contacts', 500)
+    return handleSalesforceError(error)
   }
 }

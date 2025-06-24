@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { signOut } from 'next-auth/react'
 import { 
   Account, 
   Contact, 
@@ -37,6 +38,15 @@ function useApiData<T>(
         const response = await fetch(url)
         
         if (!response.ok) {
+          // 401エラーの場合は自動的にサインアウト
+          if (response.status === 401) {
+            const errorData = await response.json().catch(() => ({}))
+            if (errorData.code === 'SESSION_EXPIRED' || response.status === 401) {
+              await signOut({ callbackUrl: '/auth/signin' })
+              throw new Error('Session expired')
+            }
+          }
+          
           const errorText = await response.text()
           throw new Error(errorText || `HTTP error! status: ${response.status}`)
         }

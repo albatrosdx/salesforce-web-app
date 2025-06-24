@@ -1,4 +1,5 @@
 import { createSalesforceClient, createApiResponse, createApiError } from '@/lib/api/salesforce'
+import { handleSalesforceError } from '@/lib/api/middleware'
 
 export async function GET() {
   try {
@@ -11,17 +12,8 @@ export async function GET() {
     const permissions = await client.getUserPermissions()
     
     return createApiResponse(permissions)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Permissions API error:', error)
-    
-    // フォールバック権限を返す
-    const fallbackPermissions = {
-      accounts: { create: false, read: true, edit: false, delete: false },
-      contacts: { create: false, read: true, edit: false, delete: false },
-      opportunities: { create: false, read: true, edit: false, delete: false },
-      activities: { create: false, read: true, edit: false, delete: false }
-    }
-    
-    return createApiResponse(fallbackPermissions)
+    return handleSalesforceError(error)
   }
 }
