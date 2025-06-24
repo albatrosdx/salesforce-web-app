@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Card, CardContent, Button } from '@/components'
 import { Task, Event } from '@/types/salesforce'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/config'
 
 type Activity = (Task | Event) & { activityType: 'Task' | 'Event' }
 
@@ -12,16 +14,80 @@ interface ActivitiesResponse {
 
 async function getActivities(): Promise<ActivitiesResponse> {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/salesforce/activities/list?limit=50`,
-      { cache: 'no-store' }
-    )
+    const session = await getServerSession(authOptions)
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch activities')
+    if (!session?.accessToken || !session?.instanceUrl) {
+      return { records: [], totalSize: 0, done: true }
     }
+
+    const limit = '50'
     
-    return response.json()
+    // タスクを取得
+    const taskSoql = `
+      SELECT Id, Subject, Status, Priority, ActivityDate, Description,
+             WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
+             OwnerId, Owner.Name, IsHighPriority, IsClosed,
+             CreatedDate, LastModifiedDate
+      FROM Task
+      WHERE IsDeleted = false
+      ORDER BY ActivityDate DESC, CreatedDate DESC
+      LIMIT ${limit}
+    `
+    
+    // イベントを取得
+    const eventSoql = `
+      SELECT Id, Subject, Location, Description, ActivityDate, ActivityDateTime,
+             StartDateTime, EndDateTime, DurationInMinutes,
+             WhatId, What.Name, What.Type, WhoId, Who.Name, Who.Type,
+             OwnerId, Owner.Name, IsAllDayEvent,
+             CreatedDate, LastModifiedDate
+      FROM Event
+      WHERE IsDeleted = false
+      ORDER BY ActivityDateTime DESC, CreatedDate DESC
+      LIMIT ${limit}
+    `
+    
+    const [tasksResponse, eventsResponse] = await Promise.all([
+      fetch(`${session.instanceUrl}/services/data/v58.0/query/?q=${encodeURIComponent(taskSoql)}`, {
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }),
+      fetch(`${session.instanceUrl}/services/data/v58.0/query/?q=${encodeURIComponent(eventSoql)}`, {
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      })
+    ])
+
+    if (!tasksResponse.ok || !eventsResponse.ok) {
+      console.error('Salesforce API error:', {
+        tasks: !tasksResponse.ok ? await tasksResponse.text() : 'OK',
+        events: !eventsResponse.ok ? await eventsResponse.text() : 'OK'
+      })
+      return { records: [], totalSize: 0, done: true }
+    }
+
+    const tasks = await tasksResponse.json()
+    const events = await eventsResponse.json()
+    
+    // タスクとイベントを統合して返す
+    const activities = [
+      ...tasks.records.map((task: any) => ({ ...task, activityType: 'Task' as const })),
+      ...events.records.map((event: any) => ({ ...event, activityType: 'Event' as const }))
+    ].sort((a, b) => {
+      const dateA = new Date(a.ActivityDate || a.ActivityDateTime || a.CreatedDate)
+      const dateB = new Date(b.ActivityDate || b.ActivityDateTime || b.CreatedDate)
+      return dateB.getTime() - dateA.getTime()
+    })
+    
+    return {
+      records: activities,
+      totalSize: tasks.totalSize + events.totalSize,
+      done: tasks.done && events.done
+    }
   } catch (error) {
     console.error('Error fetching activities:', error)
     return { records: [], totalSize: 0, done: true }
