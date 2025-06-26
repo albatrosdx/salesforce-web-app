@@ -52,7 +52,6 @@ export async function POST(request: Request) {
     const accessToken = await getSalesforceAccessToken()
 
     const client = new SalesforceClient(SALESFORCE_INSTANCE_URL, accessToken)
-    // createApiError is not needed here as client is always instantiated
 
     let sessionData: { externalSessionKey: string; endpoints: { messages: string; end: string } } | null = null
     let account: Account | null = null
@@ -130,7 +129,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to send message to agent', details: errorBody }, { status: 500 })
     }
 
-    // ストリーミングレスポンスを処理
+    // 3. ストリーミングレスポンスを処理
     const reader = messageResponse.body.getReader()
     const decoder = new TextDecoder()
     let fullResponse = ''
@@ -154,7 +153,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // セッションを終了 (今回はリクエストごとに終了させる)
+    // 4. セッションを終了 (今回はリクエストごとに終了させる)
     await fetch(endSessionUrl, {
       method: 'POST',
       headers: {
