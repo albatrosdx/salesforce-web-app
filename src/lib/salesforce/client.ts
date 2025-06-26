@@ -113,9 +113,17 @@ export class SalesforceClient {
       'Id', 'Name', 'Type', 'Industry', 'Phone', 'Website',
       'BillingStreet', 'BillingCity', 'BillingState', 'BillingPostalCode', 'BillingCountry',
       'Description', 'NumberOfEmployees', 'AnnualRevenue',
-      'CreatedDate', 'LastModifiedDate', 'CreatedById', 'LastModifiedById'
+      'CreatedDate', 'LastModifiedDate', 'CreatedById', 'LastModifiedById',
+      'AgentSessionData__c' // Add the custom field here
     ]
     return this.getRecord<Account>('Account', id, fields)
+  }
+
+  async updateAccountAgentSession(accountId: string, sessionData: string): Promise<void> {
+    const data = {
+      AgentSessionData__c: sessionData,
+    }
+    await this.updateRecord('Account', accountId, data)
   }
 
   async searchAccounts(searchTerm: string, limit = 20, offset = 0): Promise<SalesforceQueryResponse<Account>> {

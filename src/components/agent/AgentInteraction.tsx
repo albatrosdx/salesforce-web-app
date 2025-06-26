@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button, TextArea, Card, CardContent } from '@/components/ui'
 
-export function AgentInteraction() {
+export function AgentInteraction({ accountId }: { accountId: string }) {
   const [prompt, setPrompt] = useState('')
   const [response, setResponse] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -18,7 +18,7 @@ export function AgentInteraction() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ accountId, prompt }),
       })
 
       if (!res.ok) {
