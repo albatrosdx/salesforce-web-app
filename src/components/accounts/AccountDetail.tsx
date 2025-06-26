@@ -349,7 +349,7 @@ export function AccountDetail({
             )}
 
             {activeTab === 'agent' && (
-              <AgentInteraction />
+              <AgentInteraction accountId={account.Id} />
             )}
           </div>
         </CardContent>

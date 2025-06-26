@@ -24,6 +24,7 @@ export interface Account extends SalesforceRecord {
   Description?: string
   NumberOfEmployees?: number
   AnnualRevenue?: number
+  AgentSessionData__c?: string
 }
 
 // 取引先責任者（Contact）
