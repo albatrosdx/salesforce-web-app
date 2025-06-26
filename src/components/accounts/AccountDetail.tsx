@@ -6,6 +6,7 @@ import { Account, Contact, Opportunity } from '@/types'
 import { Card, CardContent, CardHeader, Button } from '@/components/ui'
 import { formatDate, formatCurrency, formatAddress } from '@/utils'
 import { ActivityTimeline, ActivityCreateModal } from '@/components/activities'
+import { AgentInteraction } from '@/components/agent/AgentInteraction'
 import { EditPermissionGate, DeletePermissionGate, CreatePermissionGate, PermissionDenied } from '@/components/permissions'
 import { useActivitiesByWhat } from '@/lib/salesforce/api-hooks'
 import { useAccountPermissions } from '@/lib/permissions/hooks'
@@ -27,7 +28,7 @@ export function AccountDetail({
   onEdit,
   onDelete 
 }: AccountDetailProps) {
-  const [activeTab, setActiveTab] = useState<'details' | 'contacts' | 'opportunities' | 'activities'>('details')
+  const [activeTab, setActiveTab] = useState<'details' | 'contacts' | 'opportunities' | 'activities' | 'agent'>('details')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   
   // Fetch activities data for this account
@@ -50,6 +51,7 @@ export function AccountDetail({
       label: '活動', 
       count: activities ? (activities.tasks.records.length + activities.events.records.length) : null 
     },
+    { id: 'agent', label: 'AIエージェント', count: null },
   ] as const
 
   if (loading) {
@@ -344,6 +346,10 @@ export function AccountDetail({
                   }}
                 />
               </div>
+            )}
+
+            {activeTab === 'agent' && (
+              <AgentInteraction />
             )}
           </div>
         </CardContent>
