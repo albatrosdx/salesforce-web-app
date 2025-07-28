@@ -6,6 +6,7 @@ import { Card, CardHeader, CardContent } from '../ui/Card'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { usePermissions } from '@/lib/permissions'
 import Link from 'next/link'
+import { checkApiResponse } from '@/lib/api/error-handlers'
 
 interface DashboardStats {
   accounts: number
@@ -30,8 +31,12 @@ export function DashboardHome() {
         setLoading(true)
         const response = await fetch('/api/salesforce/dashboard/stats')
         
+        // 認証エラーのチェック
+        await checkApiResponse(response)
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch dashboard statistics')
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Failed to fetch dashboard statistics')
         }
         
         const data = await response.json()

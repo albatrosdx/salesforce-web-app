@@ -17,6 +17,12 @@ export async function createSalesforceClient(): Promise<SalesforceClient | null>
       return null
     }
 
+    // セッションエラーがある場合は null を返す
+    if ((session as any).error === 'RefreshAccessTokenError') {
+      console.error('Session has refresh token error')
+      return null
+    }
+
     return new SalesforceClient(
       session.instanceUrl,
       session.accessToken
