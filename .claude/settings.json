@@ -58,7 +58,9 @@
       "Bash(git pr create:*)"
     ],
     "deny": [
-      "Bash(git push origin main:*)"
+      "Bash(git push origin main:*)",
+      "Bash(rm -rf:*)"
+
     ]
   }
 }
