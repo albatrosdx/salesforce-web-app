@@ -38,12 +38,27 @@ export async function withAuth(
  * Salesforce APIエラーをチェックして、セッション切れの場合は401を返す
  */
 export function handleSalesforceError(error: any): Response {
+  // JWT認証エラーの処理
+  if (error.message?.includes('INVALID_JWT_FORMAT') || error.message?.includes('JWT')) {
+    return NextResponse.json(
+      { 
+        error: 'Authentication Error', 
+        message: 'JWT認証形式が無効です。再度ログインしてください。',
+        code: 'INVALID_JWT_FORMAT',
+        details: error.salesforceErrors || []
+      },
+      { status: 401 }
+    )
+  }
+  
+  // セッション切れエラーの処理
   if (error.statusCode === 401 || error.message?.includes('Session expired')) {
     return NextResponse.json(
       { 
         error: 'Session Expired', 
         message: 'Salesforceセッションが期限切れです。再度ログインしてください。',
-        code: 'SESSION_EXPIRED'
+        code: 'SESSION_EXPIRED',
+        details: error.salesforceErrors || []
       },
       { status: 401 }
     )
@@ -53,7 +68,8 @@ export function handleSalesforceError(error: any): Response {
   return NextResponse.json(
     { 
       error: error.message || 'Unknown error',
-      details: error.salesforceErrors || []
+      details: error.salesforceErrors || [],
+      statusCode: error.statusCode
     },
     { status: error.statusCode || 500 }
   )

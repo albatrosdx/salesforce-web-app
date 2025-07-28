@@ -1,13 +1,15 @@
 'use client'
 
 import { signIn, getSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, Button } from '@/components'
 
-export default function SignInPage() {
+function SignInContent() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
 
   useEffect(() => {
     const checkSession = async () => {
@@ -41,6 +43,14 @@ export default function SignInPage() {
             <p className="text-gray-600">
               Salesforceアカウントでログインしてください
             </p>
+            
+            {error === 'SessionExpired' && (
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <p className="text-sm text-yellow-800">
+                  セッションの有効期限が切れました。再度ログインしてください。
+                </p>
+              </div>
+            )}
           </div>
           
           <div className="space-y-4">
@@ -60,5 +70,17 @@ export default function SignInPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   )
 }
