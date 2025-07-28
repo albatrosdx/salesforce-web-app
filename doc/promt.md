@@ -11,7 +11,8 @@ Salesforceの取引先、取引先責任者、商談、各種活動をREST API�
 -Salesforce
 
 ▪️認証
-・認証についてはSalesforceをIDPとしてください。・こちらのwebアプリはSPとしてください。
+・認証についてはSalesforceをIDPとしてください。
+・こちらのwebアプリはSPとしてください。
 ・SPInitiatedによる安全な認証フローを使用してください。
 
 ▪️画面
