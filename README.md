@@ -242,3 +242,5 @@ HTTPmethod: DELETE
 Content-Type: x-session-end-reason: UserRequest  
 Authorization: Bearer {Access_token}
 
+
+README.mdに記載のagentAPIの実装を行ってください。routesについてはそれぞれAPIごとに分ける形で実装とします。
